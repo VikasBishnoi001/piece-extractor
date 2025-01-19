@@ -1,24 +1,501 @@
-# Test Piece
+# Azure OpenAI
 
-A test piece to verify documentation generator
+Powerful AI tools from Microsoft
 
-Minimum Supported Release: 0.5.0
-Authors: testauthor
+Minimum Supported Release: 0.36.1
+Authors: MoShizzle, abuaboud
 
-## Available Actions
+---
 
-### Test Action
-A test action with various property types
+## Actions
 
-#### Parameters:
-- **Text Input** (Required)
-  - Type: Text
-  - Description: A simple text input field
+### Ask GPT
 
-- **Number Input** (Optional)
-  - Type: Number
-  - Description: A numeric input field
+The maximum number of tokens to generate. Requests can use up to 2,048 or 4,096 tokens shared between prompt and completion depending on the model. Don't set the value to maximum and leave some tokens for the input. (One token is roughly 4 characters for normal English text
 
-- **Enable Feature** (Optional)
-  - Type: Boolean
-  - Description: Toggle this feature on/off
+#### Parameters
+
+- **Deployment Name** (**Required**)
+  - Type: `Text`
+  - Description: The name of your model deployment.
+
+- **Question** (**Required**)
+  - Type: `Text`
+
+- **Temperature** (Optional)
+  - Type: `Number`
+  - Description: Controls randomness: Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive.
+  - Default Value: `0.9`
+
+- **Maximum Tokens** (**Required**)
+  - Type: `Number`
+  - Description: The maximum number of tokens to generate. Requests can use up to 2,048 or 4,096 tokens shared between prompt and completion depending on the model. Don't set the value to maximum and leave some tokens for the input. (One token is roughly 4 characters for normal English text
+  - Default Value: `2048`
+
+- **Top P** (Optional)
+  - Type: `Number`
+  - Description: An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+  - Default Value: `1`
+
+- **Frequency penalty** (Optional)
+  - Type: `Number`
+  - Description: Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+  - Default Value: `0`
+
+- **Presence penalty** (Optional)
+  - Type: `Number`
+  - Description: Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the mode's likelihood to talk about new topics.
+  - Default Value: `0.6`
+
+- **Memory Key** (Optional)
+  - Type: `Text`
+  - Description: A memory key that will keep the chat history shared across runs and flows. Keep it empty to leave ChatGPT without memory of previous messages.
+
+- **Roles** (Optional)
+  - Type: `JSON`
+  - Description: Array of roles to specify more accurate response
+  - Default Value: `[`
+
+---
+
+
+
+
+# Confluence
+
+Minimum Supported Release: 0.30.0
+Authors: geekyme
+
+---
+
+## Actions
+
+### Get Page Content
+
+Confluence Cloud REST API v2
+
+#### Parameters
+
+- **Page ID** (**Required**)
+  - Type: `Text`
+  - Description: Get this from the page URL of your Confluence Cloud
+
+---
+
+
+
+
+# Dropbox
+
+Cloud storage and file synchronization
+
+Minimum Supported Release: 0.30.0
+
+---
+
+## Actions
+
+### Copy folder
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+
+#### Parameters
+
+- **From Path** (**Required**)
+  - Type: `Text`
+  - Description: The source path of the folder (e.g. /folder1/sourceFolder
+
+- **To Path** (**Required**)
+  - Type: `Text`
+  - Description: The destination path for the copied folder (e.g. /folder2/destinationFolder
+
+- **Auto Rename** (Optional)
+  - Type: `Boolean`
+  - Description: If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+  - Default Value: `False`
+
+- **Allow Ownership Transfer** (Optional)
+  - Type: `Boolean`
+  - Description: Allows copy by owner even if it would result in an ownership transfer.
+  - Default Value: `False`
+
+---
+
+### Create New Folder
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
+#### Parameters
+
+- **Path** (**Required**)
+  - Type: `Text`
+  - Description: The path of the new folder e.g. /Homework/math
+
+- **Auto Rename** (Optional)
+  - Type: `Boolean`
+  - Description: If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
+---
+
+### Move file
+
+If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+
+#### Parameters
+
+- **From Path** (**Required**)
+  - Type: `Text`
+  - Description: The current path of the file (e.g. /folder1/oldfile.txt
+
+- **To Path** (**Required**)
+  - Type: `Text`
+  - Description: The new path for the file (e.g. /folder2/newfile.txt
+
+- **Auto Rename** (Optional)
+  - Type: `Boolean`
+  - Description: If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+  - Default Value: `False`
+
+- **Allow Ownership Transfer** (Optional)
+  - Type: `Boolean`
+  - Description: Allows moves by owner even if it would result in an ownership transfer.
+  - Default Value: `False`
+
+---
+
+### Upload file
+
+If there's a conflict, as determined by mode, have the Dropbox server try to autorename the file to avoid conflict.
+
+#### Parameters
+
+- **Path** (**Required**)
+  - Type: `Text`
+  - Description: The path where the file should be saved (e.g. /folder1/file.txt
+
+- **File** (**Required**)
+  - Type: `File`
+  - Description: The file URL or base64 to upload
+
+- **Auto Rename** (Optional)
+  - Type: `Boolean`
+  - Description: If there's a conflict, as determined by mode, have the Dropbox server try to autorename the file to avoid conflict.
+  - Default Value: `False`
+
+- **Mute** (Optional)
+  - Type: `Boolean`
+  - Description: Normally, users are made aware of any file modifications in their Dropbox account via notifications in the client software. If true, this tells the clients that this modification shouldn't result in a user notification.
+
+- **Strict conflict** (Optional)
+  - Type: `Boolean`
+  - Description: Be more strict about how each WriteMode detects conflict. For example, always return a conflict error when mode = WriteMode.update and the given "rev" doesn't match the existing file's "rev", even if the existing file has been deleted.
+
+---
+
+### List a folder
+
+List the contents of a folder
+
+#### Parameters
+
+- **Path** (**Required**)
+  - Type: `Text`
+  - Description: The path of the folder to be listed (e.g. /folder1). Use an empty string for the root folder.
+
+- **Recursive** (Optional)
+  - Type: `Boolean`
+  - Description: If set to true, the list folder operation will be applied recursively to all subfolders and the response will contain contents of all subfolders.
+  - Default Value: `False`
+
+- **Limit** (Optional)
+  - Type: `Number`
+  - Description: The maximum number of results to return (between 1 and 2000). Default is 2000 if not specified.
+
+---
+
+### Search
+
+Search for files and folders
+
+#### Parameters
+
+- **Query** (**Required**)
+  - Type: `Text`
+  - Description: The search string. Must be at least 3 characters.
+
+- **Path** (Optional)
+  - Type: `Text`
+  - Description: The path to search in. If not specified, the search is performed from the root.
+
+- **Max Results** (Optional)
+  - Type: `Number`
+  - Description: The maximum number of search results to return (up to 1000). Default is 100 if not specified.
+
+- **Order By** (Optional)
+  - Type: `StaticDropdown`
+  - Description: Specified property of the order of search results.
+  - Default Value: `'relevance'`
+
+- **File Status** (Optional)
+  - Type: `StaticDropdown`
+  - Description: Restricts search to the given file status.
+  - Default Value: `'active'`
+
+- **Filename Only** (Optional)
+  - Type: `Boolean`
+  - Description: Restricts search to only match on filenames.
+  - Default Value: `False`
+
+- **File Extensions** (Optional)
+  - Type: `Text`
+  - Description: Restricts search to only the extensions specified (comma-separated).
+
+- **File Categories** (Optional)
+  - Type: `Text`
+  - Description: Restricts search to only the file categories specified (comma-separated).
+
+- **Account ID** (Optional)
+  - Type: `Text`
+  - Description: Restricts results to the given account id.
+
+---
+
+### Create New Text File
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
+#### Parameters
+
+- **Path** (**Required**)
+  - Type: `Text`
+  - Description: The path of the new folder e.g. /Homework/math
+
+- **Text** (**Required**)
+  - Type: `Text`
+  - Description: The text to write into the file.
+
+- **Autorename** (Optional)
+  - Type: `Boolean`
+  - Description: If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
+- **Mute** (Optional)
+  - Type: `Boolean`
+  - Description: Normally, users are made aware of any file modifications in their Dropbox account via notifications in the client software. If true, this tells the clients that this modification shouldn't result in a user notification.
+
+- **Strict conflict** (Optional)
+  - Type: `Boolean`
+  - Description: Be more strict about how each WriteMode detects conflict. For example, always return a conflict error when mode = WriteMode.update and the given "rev" doesn't match the existing file's "rev", even if the existing file has been deleted.
+
+---
+
+### Delete file
+
+Delete a file
+
+#### Parameters
+
+- **Path** (**Required**)
+  - Type: `Text`
+  - Description: The path of the file to be deleted (e.g. /folder1/file.txt
+
+---
+
+### Get temporary file link
+
+Get a temporary file link
+
+#### Parameters
+
+- **Path** (**Required**)
+  - Type: `Text`
+  - Description: The path of the file (e.g. /folder1/file.txt
+
+---
+
+### Copy file
+
+If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+
+#### Parameters
+
+- **From Path** (**Required**)
+  - Type: `Text`
+  - Description: The source path of the file (e.g. /folder1/sourcefile.txt
+
+- **To Path** (**Required**)
+  - Type: `Text`
+  - Description: The destination path for the copied (e.g. /folder2/destinationfile.txt
+
+- **Auto Rename** (Optional)
+  - Type: `Boolean`
+  - Description: If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+  - Default Value: `False`
+
+- **Allow Ownership Transfer** (Optional)
+  - Type: `Boolean`
+  - Description: Allows copy by owner even if it would result in an ownership transfer.
+  - Default Value: `False`
+
+---
+
+### Delete folder
+
+Delete a folder
+
+#### Parameters
+
+- **Path** (**Required**)
+  - Type: `Text`
+  - Description: The path of the folder to be deleted (e.g. /folder1
+
+---
+
+### Move folder
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+
+#### Parameters
+
+- **From Path** (**Required**)
+  - Type: `Text`
+  - Description: The current path of the folder (e.g. /folder1/sourceFolder
+
+- **To Path** (**Required**)
+  - Type: `Text`
+  - Description: The new path for the folder (e.g. /folder2/destinationFolder
+
+- **Auto Rename** (Optional)
+  - Type: `Boolean`
+  - Description: If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+  - Default Value: `False`
+
+- **Allow Ownership Transfer** (Optional)
+  - Type: `Boolean`
+  - Description: Allows moves by owner even if it would result in an ownership transfer.
+  - Default Value: `False`
+
+---
+
+
+
+
+# Amazon S3
+
+Scalable storage in the cloud
+
+Minimum Supported Release: 0.30.0
+Authors: Willianwg, kishanprmr, MoShizzle, AbdulTheActivePiecer, khaledmashaly, abuaboud
+
+---
+
+## Actions
+
+### Upload File
+
+Upload an File to S3
+
+#### Parameters
+
+- **File** (**Required**)
+  - Type: `File`
+
+- **File Name** (Optional)
+  - Type: `Text`
+  - Description: my-file-name (no extension
+
+- **ACL** (Optional)
+  - Type: `StaticDropdown`
+
+- **Type** (**Required**)
+  - Type: `StaticDropdown`
+
+---
+
+### Read File
+
+Read a file from S3 to use it in other steps
+
+#### Parameters
+
+- **Key** (**Required**)
+  - Type: `Text`
+  - Description: The key of the file to read
+
+---
+
+## Triggers
+
+### New File
+
+Trigger when a new file is uploaded.
+
+#### Parameters
+
+- **Folder Path** (Optional)
+  - Type: `Text`
+
+---
+
+
+
+
+# Calendly
+
+Simple, modern scheduling
+
+Minimum Supported Release: 0.30.0
+Authors: kishanprmr, MoShizzle, AbdulTheActivePiecer, khaledmashaly, abuaboud
+
+---
+
+## Triggers
+
+### Event Canceled
+
+Triggers when a new Calendly event is canceled
+
+This trigger has no configurable parameters.
+
+---
+
+### Event Scheduled
+
+Triggers when a new Calendly event is scheduled
+
+This trigger has no configurable parameters.
+
+---
+
+
+
+
+# Binance
+
+Fetch the price of a crypto pair from Binance
+
+Minimum Supported Release: 0.30.0
+Authors: kishanprmr, khaledmashaly, abuaboud
+
+Authentication: None
+
+---
+
+## Actions
+
+### Fetch Pair Price
+
+The currency to fetch the price for (e.g. 'BTC' in 'BTC/USDT
+
+#### Parameters
+
+- **First Coin Symbol** (**Required**)
+  - Type: `Text`
+  - Description: The currency to fetch the price for (e.g. 'BTC' in 'BTC/USDT
+
+- **Second Coin Symbol** (**Required**)
+  - Type: `Text`
+  - Description: The currency to fetch the price in (e.g. 'USDT' in 'BTC/USDT
+
+---
+
+

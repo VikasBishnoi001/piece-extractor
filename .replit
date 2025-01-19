@@ -23,10 +23,10 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py test_pieces"
+args = "python main.py comm"
 
 [deployment]
-run = ["sh", "-c", "python main.py test_pieces"]
+run = ["sh", "-c", "python main.py comm"]
 
 [nix]
 channel = "stable-24_05"
