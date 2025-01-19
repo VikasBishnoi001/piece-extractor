@@ -114,6 +114,12 @@ def generate_property_docs(prop) -> List[str]:
         doc.append("  - Validation Rules:")
         for rule, value in prop.validation_rules.items():
             doc.append(f"    - {rule}: {value}")
+    if prop.input_ui_info:
+        doc.append("  - UI Configuration:")
+        for key, value in prop.input_ui_info.items():
+            doc.append(f"    - {key}: {value}")
+    if prop.package_type:
+        doc.append(f"  - Package Type: {prop.package_type}")
     doc.append("")
     return doc
 
@@ -230,7 +236,7 @@ def generate_flow_structure_docs(flow_examples: Dict) -> List[str]:
             for piece in metadata['pieces']:
                 doc.append(f'    "{piece}",')
             doc.append('  ],')
-            doc.append(f'  "template": {{')
+            doc.append('  "template": {')
             doc.append(f'    "displayName": "{metadata["template_name"]}"')
             doc.append('  }')
             doc.append("}")
@@ -268,14 +274,16 @@ def generate_flow_structure_docs(flow_examples: Dict) -> List[str]:
                 doc.append(f'{indent}  "packageType": "{step["package_type"]}",')
                 doc.append(f'{indent}  "pieceType": "{step["piece_type"]}",')
 
-                # Include error handling options
+                # Include error handling options with full details
+                doc.append(f'{indent}  "errorHandlingOptions": {{')
+                doc.append(f'{indent}    "retryOnFailure": {{"value": false}},')
+                doc.append(f'{indent}    "continueOnFailure": {{"value": false}},')
                 if step.get('error_handling'):
-                    doc.append(f'{indent}  "errorHandlingOptions": {{')
                     for opt_name, opt_value in step['error_handling'].items():
                         doc.append(f'{indent}    "{opt_name}": {json.dumps(opt_value)},')
-                    doc.append(f'{indent}  }},')
+                doc.append(f'{indent}  }},')
 
-                # Include input variables if available
+                # Include input variables if available with full details
                 if step.get('input_variables'):
                     doc.append(f'{indent}  "input": {{')
                     for var_name, var_value in step['input_variables'].items():
@@ -294,7 +302,7 @@ def generate_flow_structure_docs(flow_examples: Dict) -> List[str]:
         doc.append("}")
         doc.append("```")
 
-        # Document variable references
+        # Document variable references with detailed explanation
         doc.append("\n### Variable References")
         doc.append("The following variables are passed between steps:")
 
@@ -307,6 +315,85 @@ def generate_flow_structure_docs(flow_examples: Dict) -> List[str]:
         doc.append("\n")
     return doc
 
+def generate_component_settings_docs(component, flow_examples: Dict) -> List[str]:
+    """Generate documentation for component settings."""
+    doc = []
+    doc.append("#### Configuration Settings")
+    doc.append("This component requires the following configuration in your flow:")
+    doc.append("")
+    doc.append("```json")
+    doc.append("{")
+    doc.append('  "type": "PIECE",')
+    doc.append(f'  "name": "step_1",  // Customize this step name')
+    doc.append('  "settings": {')
+    doc.append(f'    "pieceName": "{component.piece_name}",')
+    doc.append(f'    "actionName": "{component.name}",')
+    doc.append('    "packageType": "REGISTRY",  // or "ARCHIVE" for custom pieces')
+    doc.append('    "pieceType": "OFFICIAL",  // or "CUSTOM" for custom pieces')
+
+    # Show error handling options
+    doc.append('    "errorHandlingOptions": {')
+    doc.append('      "retryOnFailure": {"value": false},')
+    doc.append('      "continueOnFailure": {"value": false},')
+    doc.append('      "maxRetries": 3,  // Optional')
+    doc.append('      "retryInterval": 1000  // Optional, in milliseconds')
+    doc.append('    },')
+
+    # Show input configuration
+    if component.properties:
+        doc.append('    "input": {')
+        for prop in component.properties:
+            if prop.default_value is not None:
+                doc.append(f'      "{prop.name}": {json.dumps(prop.default_value)},  // {prop.description}')
+            else:
+                doc.append(f'      "{prop.name}": null,  // {prop.description}')
+        doc.append('    }')
+
+    doc.append('  }')
+    doc.append('}')
+    doc.append('```')
+    doc.append("")
+
+    # Add explanation of variable usage
+    doc.append("#### Variable Usage")
+    doc.append("To reference outputs from previous steps:")
+    doc.append("```")
+    doc.append('{{step_name}}  // Reference entire output of a step')
+    doc.append('{{step_name.field_name}}  // Reference specific field')
+    doc.append('{{trigger.body}}  // Reference webhook trigger body')
+    doc.append('{{trigger.headers}}  // Reference webhook headers')
+    doc.append('{{trigger.query}}  // Reference URL query parameters')
+    doc.append("```")
+    doc.append("")
+    return doc
+
+def generate_trigger_config_docs(trigger) -> List[str]:
+    """Generate documentation for trigger configuration."""
+    doc = []
+    doc.append("#### Trigger Configuration")
+    doc.append("```json")
+    doc.append("{")
+    doc.append('  "trigger": {')
+    doc.append(f'    "type": "{trigger.trigger_type}",')
+    doc.append('    "settings": {')
+
+    if trigger.properties:
+        for prop in trigger.properties:
+            if prop.default_value is not None:
+                doc.append(f'      "{prop.name}": {json.dumps(prop.default_value)},  // {prop.description}')
+            else:
+                doc.append(f'      "{prop.name}": null,  // {prop.description}')
+
+    doc.append('    },')
+    doc.append('    "nextAction": {  // Configure your first action step here')
+    doc.append('      // ... action configuration')
+    doc.append('    }')
+    doc.append('  }')
+    doc.append('}')
+    doc.append('```')
+    doc.append("")
+    return doc
+
 def generate_documentation(piece: Piece, flow_examples: Dict) -> str:
     """Generate documentation for a piece and its actions."""
     doc = []
@@ -315,9 +402,6 @@ def generate_documentation(piece: Piece, flow_examples: Dict) -> str:
     doc.append(f"# {piece.display_name}")
     if piece.description:
         doc.append(f"\n{piece.description}")
-    doc.append(f"\nMinimum Supported Release: {piece.minimum_supported_release}")
-    if piece.authors:
-        doc.append(f"Authors: {', '.join(piece.authors)}")
     if piece.categories:
         doc.append(f"Categories: {', '.join(piece.categories)}")
     if piece.auth_type:
@@ -335,8 +419,8 @@ def generate_documentation(piece: Piece, flow_examples: Dict) -> str:
             if action.description:
                 doc.append(f"\n{action.description}\n")
 
-            if action.piece_version:
-                doc.append(f"Version: {action.piece_version}\n")
+            # Add configuration settings
+            doc.extend(generate_component_settings_docs(action, flow_examples))
 
             if action.properties:
                 doc.append("#### Parameters\n")
@@ -357,8 +441,11 @@ def generate_documentation(piece: Piece, flow_examples: Dict) -> str:
             if trigger.description:
                 doc.append(f"\n{trigger.description}\n")
 
-            if trigger.piece_version:
-                doc.append(f"Version: {trigger.piece_version}\n")
+            if trigger.trigger_type:
+                doc.append(f"Trigger Type: `{trigger.trigger_type}`\n")
+
+            # Add trigger configuration
+            doc.extend(generate_trigger_config_docs(trigger))
 
             if trigger.properties:
                 doc.append("#### Parameters\n")

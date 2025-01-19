@@ -2,9 +2,6 @@
 
 Powerful AI tools from Microsoft
 
-Minimum Supported Release: 0.36.1
-Authors: MoShizzle, abuaboud
-
 ---
 
 ## Flow Structure Example
@@ -56,6 +53,8 @@ This flow demonstrates the following sequence:
           "errorHandlingOptions": {
             "retryOnFailure": {"value": false},
             "continueOnFailure": {"value": false},
+            "retryOnFailure": {"value": false},
+            "continueOnFailure": {"value": false},
           },
           "input": {
             "input": "{{trigger.body.file.content}}",
@@ -72,6 +71,8 @@ This flow demonstrates the following sequence:
               "errorHandlingOptions": {
                 "retryOnFailure": {"value": false},
                 "continueOnFailure": {"value": false},
+                "retryOnFailure": {"value": false},
+                "continueOnFailure": {"value": false},
               },
             }
             ,"nextAction": {
@@ -83,6 +84,8 @@ This flow demonstrates the following sequence:
                   "packageType": "ARCHIVE",
                   "pieceType": "CUSTOM",
                   "errorHandlingOptions": {
+                    "retryOnFailure": {"value": false},
+                    "continueOnFailure": {"value": false},
                     "retryOnFailure": {"value": false},
                     "continueOnFailure": {"value": false},
                   },
@@ -99,6 +102,8 @@ This flow demonstrates the following sequence:
                       "packageType": "REGISTRY",
                       "pieceType": "OFFICIAL",
                       "errorHandlingOptions": {
+                        "retryOnFailure": {"value": false},
+                        "continueOnFailure": {"value": false},
                         "retryOnFailure": {"value": false},
                         "continueOnFailure": {"value": false},
                       },
@@ -129,9 +134,6 @@ This piece has no actions or triggers available.
 
 # Confluence
 
-Minimum Supported Release: 0.30.0
-Authors: geekyme
-
 ---
 
 ## Flow Structure Example
@@ -183,6 +185,8 @@ This flow demonstrates the following sequence:
           "errorHandlingOptions": {
             "retryOnFailure": {"value": false},
             "continueOnFailure": {"value": false},
+            "retryOnFailure": {"value": false},
+            "continueOnFailure": {"value": false},
           },
           "input": {
             "input": "{{trigger.body.file.content}}",
@@ -199,6 +203,8 @@ This flow demonstrates the following sequence:
               "errorHandlingOptions": {
                 "retryOnFailure": {"value": false},
                 "continueOnFailure": {"value": false},
+                "retryOnFailure": {"value": false},
+                "continueOnFailure": {"value": false},
               },
             }
             ,"nextAction": {
@@ -210,6 +216,8 @@ This flow demonstrates the following sequence:
                   "packageType": "ARCHIVE",
                   "pieceType": "CUSTOM",
                   "errorHandlingOptions": {
+                    "retryOnFailure": {"value": false},
+                    "continueOnFailure": {"value": false},
                     "retryOnFailure": {"value": false},
                     "continueOnFailure": {"value": false},
                   },
@@ -226,6 +234,8 @@ This flow demonstrates the following sequence:
                       "packageType": "REGISTRY",
                       "pieceType": "OFFICIAL",
                       "errorHandlingOptions": {
+                        "retryOnFailure": {"value": false},
+                        "continueOnFailure": {"value": false},
                         "retryOnFailure": {"value": false},
                         "continueOnFailure": {"value": false},
                       },
@@ -258,8 +268,6 @@ This piece has no actions or triggers available.
 
 Cloud storage and file synchronization
 
-Minimum Supported Release: 0.30.0
-
 ---
 
 ## Flow Structure Example
@@ -311,6 +319,8 @@ This flow demonstrates the following sequence:
           "errorHandlingOptions": {
             "retryOnFailure": {"value": false},
             "continueOnFailure": {"value": false},
+            "retryOnFailure": {"value": false},
+            "continueOnFailure": {"value": false},
           },
           "input": {
             "input": "{{trigger.body.file.content}}",
@@ -327,6 +337,8 @@ This flow demonstrates the following sequence:
               "errorHandlingOptions": {
                 "retryOnFailure": {"value": false},
                 "continueOnFailure": {"value": false},
+                "retryOnFailure": {"value": false},
+                "continueOnFailure": {"value": false},
               },
             }
             ,"nextAction": {
@@ -338,6 +350,8 @@ This flow demonstrates the following sequence:
                   "packageType": "ARCHIVE",
                   "pieceType": "CUSTOM",
                   "errorHandlingOptions": {
+                    "retryOnFailure": {"value": false},
+                    "continueOnFailure": {"value": false},
                     "retryOnFailure": {"value": false},
                     "continueOnFailure": {"value": false},
                   },
@@ -354,6 +368,8 @@ This flow demonstrates the following sequence:
                       "packageType": "REGISTRY",
                       "pieceType": "OFFICIAL",
                       "errorHandlingOptions": {
+                        "retryOnFailure": {"value": false},
+                        "continueOnFailure": {"value": false},
                         "retryOnFailure": {"value": false},
                         "continueOnFailure": {"value": false},
                       },
@@ -386,9 +402,6 @@ This piece has no actions or triggers available.
 
 Scalable storage in the cloud
 
-Minimum Supported Release: 0.30.0
-Authors: Willianwg, kishanprmr, MoShizzle, AbdulTheActivePiecer, khaledmashaly, abuaboud
-
 ---
 
 ## Flow Structure Example
@@ -440,6 +453,8 @@ This flow demonstrates the following sequence:
           "errorHandlingOptions": {
             "retryOnFailure": {"value": false},
             "continueOnFailure": {"value": false},
+            "retryOnFailure": {"value": false},
+            "continueOnFailure": {"value": false},
           },
           "input": {
             "input": "{{trigger.body.file.content}}",
@@ -456,6 +471,8 @@ This flow demonstrates the following sequence:
               "errorHandlingOptions": {
                 "retryOnFailure": {"value": false},
                 "continueOnFailure": {"value": false},
+                "retryOnFailure": {"value": false},
+                "continueOnFailure": {"value": false},
               },
             }
             ,"nextAction": {
@@ -467,6 +484,8 @@ This flow demonstrates the following sequence:
                   "packageType": "ARCHIVE",
                   "pieceType": "CUSTOM",
                   "errorHandlingOptions": {
+                    "retryOnFailure": {"value": false},
+                    "continueOnFailure": {"value": false},
                     "retryOnFailure": {"value": false},
                     "continueOnFailure": {"value": false},
                   },
@@ -483,6 +502,8 @@ This flow demonstrates the following sequence:
                       "packageType": "REGISTRY",
                       "pieceType": "OFFICIAL",
                       "errorHandlingOptions": {
+                        "retryOnFailure": {"value": false},
+                        "continueOnFailure": {"value": false},
                         "retryOnFailure": {"value": false},
                         "continueOnFailure": {"value": false},
                       },
@@ -512,6 +533,23 @@ The following variables are passed between steps:
 
 Trigger when a new file is uploaded.
 
+Trigger Type: `TriggerStrategy`
+
+#### Trigger Configuration
+```json
+{
+  "trigger": {
+    "type": "TriggerStrategy",
+    "settings": {
+      "folderPath": null,  // 
+    },
+    "nextAction": {  // Configure your first action step here
+      // ... action configuration
+    }
+  }
+}
+```
+
 #### Parameters
 
 - **Folder Path** (Optional)
@@ -525,9 +563,6 @@ Trigger when a new file is uploaded.
 # Calendly
 
 Simple, modern scheduling
-
-Minimum Supported Release: 0.30.0
-Authors: kishanprmr, MoShizzle, AbdulTheActivePiecer, khaledmashaly, abuaboud
 
 ---
 
@@ -580,6 +615,8 @@ This flow demonstrates the following sequence:
           "errorHandlingOptions": {
             "retryOnFailure": {"value": false},
             "continueOnFailure": {"value": false},
+            "retryOnFailure": {"value": false},
+            "continueOnFailure": {"value": false},
           },
           "input": {
             "input": "{{trigger.body.file.content}}",
@@ -596,6 +633,8 @@ This flow demonstrates the following sequence:
               "errorHandlingOptions": {
                 "retryOnFailure": {"value": false},
                 "continueOnFailure": {"value": false},
+                "retryOnFailure": {"value": false},
+                "continueOnFailure": {"value": false},
               },
             }
             ,"nextAction": {
@@ -607,6 +646,8 @@ This flow demonstrates the following sequence:
                   "packageType": "ARCHIVE",
                   "pieceType": "CUSTOM",
                   "errorHandlingOptions": {
+                    "retryOnFailure": {"value": false},
+                    "continueOnFailure": {"value": false},
                     "retryOnFailure": {"value": false},
                     "continueOnFailure": {"value": false},
                   },
@@ -623,6 +664,8 @@ This flow demonstrates the following sequence:
                       "packageType": "REGISTRY",
                       "pieceType": "OFFICIAL",
                       "errorHandlingOptions": {
+                        "retryOnFailure": {"value": false},
+                        "continueOnFailure": {"value": false},
                         "retryOnFailure": {"value": false},
                         "continueOnFailure": {"value": false},
                       },
@@ -652,6 +695,22 @@ The following variables are passed between steps:
 
 Triggers when a new Calendly event is canceled
 
+Trigger Type: `TriggerStrategy`
+
+#### Trigger Configuration
+```json
+{
+  "trigger": {
+    "type": "TriggerStrategy",
+    "settings": {
+    },
+    "nextAction": {  // Configure your first action step here
+      // ... action configuration
+    }
+  }
+}
+```
+
 This trigger has no configurable parameters.
 
 ---
@@ -659,6 +718,22 @@ This trigger has no configurable parameters.
 ### Event Scheduled
 
 Triggers when a new Calendly event is scheduled
+
+Trigger Type: `TriggerStrategy`
+
+#### Trigger Configuration
+```json
+{
+  "trigger": {
+    "type": "TriggerStrategy",
+    "settings": {
+    },
+    "nextAction": {  // Configure your first action step here
+      // ... action configuration
+    }
+  }
+}
+```
 
 This trigger has no configurable parameters.
 
@@ -670,9 +745,6 @@ This trigger has no configurable parameters.
 # Binance
 
 Fetch the price of a crypto pair from Binance
-
-Minimum Supported Release: 0.30.0
-Authors: kishanprmr, khaledmashaly, abuaboud
 
 Authentication: None
 
@@ -727,6 +799,8 @@ This flow demonstrates the following sequence:
           "errorHandlingOptions": {
             "retryOnFailure": {"value": false},
             "continueOnFailure": {"value": false},
+            "retryOnFailure": {"value": false},
+            "continueOnFailure": {"value": false},
           },
           "input": {
             "input": "{{trigger.body.file.content}}",
@@ -743,6 +817,8 @@ This flow demonstrates the following sequence:
               "errorHandlingOptions": {
                 "retryOnFailure": {"value": false},
                 "continueOnFailure": {"value": false},
+                "retryOnFailure": {"value": false},
+                "continueOnFailure": {"value": false},
               },
             }
             ,"nextAction": {
@@ -754,6 +830,8 @@ This flow demonstrates the following sequence:
                   "packageType": "ARCHIVE",
                   "pieceType": "CUSTOM",
                   "errorHandlingOptions": {
+                    "retryOnFailure": {"value": false},
+                    "continueOnFailure": {"value": false},
                     "retryOnFailure": {"value": false},
                     "continueOnFailure": {"value": false},
                   },
@@ -770,6 +848,8 @@ This flow demonstrates the following sequence:
                       "packageType": "REGISTRY",
                       "pieceType": "OFFICIAL",
                       "errorHandlingOptions": {
+                        "retryOnFailure": {"value": false},
+                        "continueOnFailure": {"value": false},
                         "retryOnFailure": {"value": false},
                         "continueOnFailure": {"value": false},
                       },
