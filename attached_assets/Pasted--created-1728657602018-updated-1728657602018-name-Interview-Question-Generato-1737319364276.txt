@@ -1,0 +1,152 @@
+{
+  "created": "1728657602018",
+  "updated": "1728657602018",
+  "name": "Interview Question Generator",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-http"
+  ],
+  "blogUrl": "",
+  "template": {
+    "displayName": "Interview Question Generator",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": "{{trigger.body.jobDescription}}"
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "long_text",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_4",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "input": "You are an AI-powered interview assistant. Your task is to generate a comprehensive list of interview questions tailored to a candidate based on their resume and the job description provided. The questions should be categorized into Technical and HR rounds, assessing the candidate's qualifications, experience, skills, and cultural fit. The questions should also explore areas that may require further clarification or discussion.\n\nInstructions:\nJob Description Analysis:\nReview the job description to understand the required technical skills, qualifications, key responsibilities, and soft skills necessary for the role.\nResume Review:\nAnalyze the resume to identify the candidate's experience, skills, achievements, and areas that align or may not align with the job requirements.\nConsider the candidate's experience level (junior, mid-level, senior) to adjust the complexity of the technical questions accordingly.\nQuestion Generation:\nGenerate 20 interview questions for the Technical Round that:\nAssess the candidate's technical expertise, proficiency in relevant tools/technologies, and ability to solve job-specific challenges. Make sure to dive deep into technical concepts that are required for the job.\nExplore how their past projects and achievements align with the technical demands of the role.\nClarify any gaps, inconsistencies, or unclear technical experiences listed in the resume.\nEvaluate the candidate's problem-solving skills, logical thinking, and ability to work on the required technical tasks.\nGenerate 10 interview questions for the HR Round that:\nAssess the candidate's soft skills, communication abilities, and cultural fit for the company.\nExplore their motivation, interest in the company, and alignment with the company's values.\nAddress any career transitions, gaps, or changes in job roles listed in the resume.\nDiscuss how the candidate's personal and professional goals align with the company's vision and long-term plans.\nUnderstand their ability to collaborate, lead (if applicable), and handle workplace challenges.\n\nDo not generate heading for the question, only output the questions. The output should be in markdown to make it presentable.\n\nNote: Strictly do not give ```markdown in the output."
+            },
+            "pieceName": "@activepieces/piece-inputs",
+            "pieceType": "CUSTOM",
+            "actionName": "text_input",
+            "inputUiInfo": {},
+            "packageType": "ARCHIVE",
+            "pieceVersion": "0.0.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_3",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['zbrain-ai']}}",
+                "model": "gpt-4o",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "{{step_4}}"
+                  },
+                  {
+                    "role": "user",
+                    "content": "Job Description - {{step_1}}, Candidate's Resume - {{trigger.body.file.content}}"
+                  }
+                ],
+                "maxTokens": "4096",
+                "temperature": "0.7"
+              },
+              "pieceName": "@activepieces/piece-zbrain-ai",
+              "pieceType": "CUSTOM",
+              "actionName": "models",
+              "inputUiInfo": {},
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.0.4",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_6",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "url": "https://app.zbrain.ai:3012/api/worker-records/{{trigger.body.workerRecordId}}",
+                  "body": {
+                    "output": {
+                      "markdown": "{{step_3['content']}}"
+                    },
+                    "tenantId": "{{trigger.body.tenantId}}",
+                    "workerId": "{{trigger.body.workerId}}"
+                  },
+                  "method": "PUT",
+                  "headers": {
+                    "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                  },
+                  "failsafe": false,
+                  "queryParams": {}
+                },
+                "pieceName": "@activepieces/piece-http",
+                "pieceType": "OFFICIAL",
+                "actionName": "send_request",
+                "inputUiInfo": {},
+                "packageType": "REGISTRY",
+                "pieceVersion": "0.3.10",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "displayName": "Send HTTP request"
+            },
+            "displayName": "Models"
+          },
+          "displayName": "Prompt"
+        },
+        "displayName": "Variable: JD"
+      },
+      "type": "WEBHOOK",
+      "settings": {
+        "inputUiInfo": {}
+      }
+    },
+    "valid": true
+  }
+}
