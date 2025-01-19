@@ -1,0 +1,357 @@
+{
+  "created": "1737174730769",
+  "updated": "1737174730769",
+  "name": "Order Status Update Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-jira-cloud",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-gmail",
+    "@activepieces/piece-utilities"
+  ],
+  "template": {
+    "displayName": "Order Status Update Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": {
+              "input": "{{trigger['body']}}"
+            }
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "json_input",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_2",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "url": {
+                "url": "https://leewayhertz.atlassian.net/rest/api/3/search"
+              },
+              "auth": "{{connections['jira-deepak']}}",
+              "body": {
+                "jql": "project = OM AND status CHANGED AFTER -1d ORDER BY updated DESC ",
+                "fields": [
+                  "summary",
+                  "status",
+                  "assignee",
+                  "updated",
+                  "description",
+                  "customfield_12774",
+                  "customfield_12777"
+                ],
+                "startAt": 0,
+                "maxResults": 10
+              },
+              "method": "POST",
+              "headers": {},
+              "failsafe": false,
+              "queryParams": {}
+            },
+            "pieceName": "@activepieces/piece-jira-cloud",
+            "pieceType": "OFFICIAL",
+            "actionName": "custom_api_call",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "REGISTRY",
+            "pieceVersion": "0.0.11",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_6",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "input": "You are a helpful assistant that drafts professional, concise, and informative emails to notify users about updates to their order status. Use the provided details to craft a polished email that includes all relevant order information.\nDo not use asterisks or any formatting symbols in the output; keep the text plain and clean.\nThe email should include:\nA clear subject line mentioning the order reference number and its updated status.\nA professional greeting (e.g., 'Dear [User],').\nA brief introduction specifying:\nThe order reference number\nThe previous status\nThe updated status\nComprehensive order details, including:\nItems ordered (with item names and quantities if available)\nEstimated delivery date\nOrder total (if applicable)\nA clear closing line offering assistance if the user has any questions or requires support.\nEnsure the email is easy to read, well-structured, and free from unnecessary information.\nFormat the output as follows:\nSubject: Order Update: \"{Order Reference}\" is now {New Status}\nBody:\nDear {User},\nWe are pleased to inform you that your order with the reference number \"{Order Reference}\" has been updated. It has transitioned from \"{Previous Status}\" to \"{New Status}\".\nOrder Details:\n\nItems Ordered: {Item List with Names and Quantities}\n\nOrder Total: {Order Total}\nIf you have any questions or require further assistance, please don’t hesitate to contact our support team.\nThank you for choosing us.\nBest regards."
+              },
+              "pieceName": "@activepieces/piece-inputs",
+              "pieceType": "CUSTOM",
+              "actionName": "text_input",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_4",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "auth": "{{connections['zbrain-ai']}}",
+                  "model": "gpt-4o",
+                  "messages": [
+                    {
+                      "role": "system",
+                      "content": "{{step_6}}, provide subject and mail body in 2 different content fields"
+                    },
+                    {
+                      "role": "user",
+                      "content": "{{step_2['body']['issues'][0]['fields']['customfield_12774']}},Task Id:{{step_2['body']['issues'][0]['fields']['status']['id']}},{{step_2['body']['issues'][0]['fields']['description']['content'][0]['content'][0]['text']}}{{step_2['body']['issues'][0]['fields']['description']['content'][1]['content']}} ,Task Title: {{step_2['body']['issues'][0]['fields']['summary']}} , Task Description:{{step_2['body']['issues'][0]['fields']['status']['description']}} , Status: {{step_2['body']['issues'][0]['fields']['status']['statusCategory']['name']}} "
+                    }
+                  ],
+                  "maxTokens": "2048",
+                  "temperature": "0.5"
+                },
+                "pieceName": "@activepieces/piece-zbrain-ai",
+                "pieceType": "CUSTOM",
+                "actionName": "models",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "ARCHIVE",
+                "pieceVersion": "0.0.7",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_3",
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "input": "{{step_4['content']}}"
+                  },
+                  "pieceName": "@activepieces/piece-inputs",
+                  "pieceType": "CUSTOM",
+                  "actionName": "text_input",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "ARCHIVE",
+                  "pieceVersion": "0.0.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_7",
+                  "type": "CODE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "content": "{{step_4['content']}}"
+                    },
+                    "sourceCode": {
+                      "code": "export const code = async (inputs) => {\n  // Check if content is provided\n  if (!inputs || !inputs.content) {\n    throw new Error(\"Content is undefined or null.\");\n  }\n\n  // Get the email content\n  const emailContent = inputs.content;\n\n  // Extract the Subject using regex\n  const subjectMatch = emailContent.match(/Subject:\\s*(.+)/);\n  const subject = subjectMatch ? subjectMatch[1].trim() : \"No Subject Found\";\n\n  // Extract the Body using regex\n  const bodyMatch = emailContent.match(/Body:\\s*([\\s\\S]*)/);\n  const body = bodyMatch ? bodyMatch[1].trim() : \"No Body Found\";\n\n  // Return the subject and body as separate fields\n  return {\n    subject: subject,\n    body: body,\n  };\n};",
+                      "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                    },
+                    "inputUiInfo": {},
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_8",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "input": "{{step_7['subject']}}"
+                      },
+                      "pieceName": "@activepieces/piece-inputs",
+                      "pieceType": "CUSTOM",
+                      "actionName": "text_input",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "ARCHIVE",
+                      "pieceVersion": "0.0.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_9",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "input": "{{step_7['body']}}"
+                        },
+                        "pieceName": "@activepieces/piece-inputs",
+                        "pieceType": "CUSTOM",
+                        "actionName": "text_input",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "ARCHIVE",
+                        "pieceVersion": "0.0.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "name": "step_10",
+                        "type": "PIECE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "cc": [
+                              ""
+                            ],
+                            "bcc": [
+                              ""
+                            ],
+                            "auth": "{{connections['gmail-hridyansh']}}",
+                            "body": "{{step_9}}",
+                            "draft": true,
+                            "subject": "{{step_8}}",
+                            "receiver": [
+                              "hridyanshm@leewayhertz.com"
+                            ],
+                            "reply_to": [
+                              ""
+                            ],
+                            "body_type": "plain_text"
+                          },
+                          "pieceName": "@activepieces/piece-gmail",
+                          "pieceType": "OFFICIAL",
+                          "actionName": "send_email",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "pieceVersion": "0.7.2",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_5",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "apiKey": "{{trigger.body.auth.apiKey}}",
+                              "output": "{{step_4['content']}}",
+                              "tenantId": "{{step_8}}{{step_9}}",
+                              "workerId": "{{trigger.body.workerId}}",
+                              "workerRecordId": "{{trigger.body.workerRecordId}}"
+                            },
+                            "pieceName": "@activepieces/piece-utilities",
+                            "pieceType": "CUSTOM",
+                            "actionName": "agent_output",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "ARCHIVE",
+                            "pieceVersion": "0.2.12",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "displayName": "Agent Output"
+                        },
+                        "displayName": "Send Email"
+                      },
+                      "displayName": "Body"
+                    },
+                    "displayName": "Subject"
+                  },
+                  "displayName": "Code"
+                },
+                "displayName": "Text"
+              },
+              "displayName": "Models"
+            },
+            "displayName": "Prompt"
+          },
+          "displayName": "Custom API Call"
+        },
+        "displayName": "Inputs"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

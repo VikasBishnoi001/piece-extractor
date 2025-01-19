@@ -1,0 +1,624 @@
+{
+  "created": "1737174737414",
+  "updated": "1737174737414",
+  "name": "Contract Clause Extraction Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-http",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-store"
+  ],
+  "template": {
+    "displayName": "Contract Clause Extraction Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_2",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "auth": "{{connections['zbrain-ai']}}",
+            "json": true,
+            "query": " ",
+            "maxSize": "10000",
+            "metadata": false,
+            "summarize": false,
+            "knowledgeBases": [
+              "67123d998f957f02289c7433"
+            ]
+          },
+          "pieceName": "@activepieces/piece-zbrain-ai",
+          "pieceType": "CUSTOM",
+          "actionName": "knowledgebase",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "~0.0.6",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_17",
+          "type": "CODE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "fileUrl": "{{trigger.body.file.url}}"
+            },
+            "sourceCode": {
+              "code": "export const code = async (inputs) => {\n    let url= inputs.fileUrl;\n    const fileName = new URL(decodeURIComponent(url)).pathname.split('/').pop();\n\n  return decodeURIComponent(fileName);\n};",
+              "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+            },
+            "inputUiInfo": {},
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_18",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "url": "https://app.zbrain.ai:3000/api/knowledge-base",
+                "body": {
+                  "name": "{{step_17}}",
+                  "retrieval": {
+                    "topK": 50,
+                    "searchMethod": "SEMANTIC_SEARCH",
+                    "scoreThreshold": 0.1,
+                    "scoreThresholdEnabled": false
+                  }
+                },
+                "method": "POST",
+                "headers": {
+                  "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                },
+                "failsafe": false,
+                "queryParams": {}
+              },
+              "pieceName": "@activepieces/piece-http",
+              "pieceType": "OFFICIAL",
+              "actionName": "send_request",
+              "inputUiInfo": {},
+              "packageType": "REGISTRY",
+              "pieceVersion": "~0.3.10",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_19",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "url": "https://app.zbrain.ai:3003/api/knowledge-base-import-by-api?importType=API",
+                  "body": {
+                    "title": "{{step_17}}",
+                    "content": "{{trigger.body.file.content}}",
+                    "knowledgeBaseId": "{{step_18['body']['responseData']['_id']}}"
+                  },
+                  "method": "POST",
+                  "headers": {
+                    "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                  },
+                  "failsafe": false,
+                  "queryParams": {}
+                },
+                "pieceName": "@activepieces/piece-http",
+                "pieceType": "OFFICIAL",
+                "actionName": "send_request",
+                "inputUiInfo": {},
+                "packageType": "REGISTRY",
+                "pieceVersion": "~0.3.10",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_3",
+                "type": "CODE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "contexts": "{{step_2['contexts']}}"
+                  },
+                  "sourceCode": {
+                    "code": "export const code = async (inputs) => {\n  // Extract the \"contexts\" array from the inputs\n  const contexts = inputs.contexts;\n\n  // Create a Set to ensure unique combinations of fileName and knowledgeBaseImportId\n  const uniqueEntries = new Set();\n\n  // Result array to store unique fileName and knowledgeBaseImportId pairs\n  const resultArray = [];\n\n  // Iterate over the contexts array to extract fileName and knowledgeBaseImportId\n  contexts.forEach((context) => {\n    const { fileName, knowledgeBaseImportId } = context.metadata;\n\n    // Create a unique identifier string for each pair\n    const uniqueKey = `${fileName}-${knowledgeBaseImportId}`;\n\n    // If this combination hasn't been added yet, add it to the resultArray and Set\n    if (!uniqueEntries.has(uniqueKey)) {\n      uniqueEntries.add(uniqueKey);\n      resultArray.push({ fileName, knowledgeBaseImportId });\n    }\n  });\n\n  // Return the array of unique pairs\n  return resultArray;\n};\n",
+                    "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                  },
+                  "inputUiInfo": {},
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_4",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_3}}",
+                    "inputUiInfo": {}
+                  },
+                  "nextAction": {
+                    "name": "step_11",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "key": "Clauses",
+                        "store_scope": "COLLECTION"
+                      },
+                      "pieceName": "@activepieces/piece-store",
+                      "pieceType": "OFFICIAL",
+                      "actionName": "get",
+                      "inputUiInfo": {},
+                      "packageType": "REGISTRY",
+                      "pieceVersion": "~0.5.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_12",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "key": "Clauses",
+                          "store_scope": "COLLECTION"
+                        },
+                        "pieceName": "@activepieces/piece-store",
+                        "pieceType": "OFFICIAL",
+                        "actionName": "remove_value",
+                        "inputUiInfo": {},
+                        "packageType": "REGISTRY",
+                        "pieceVersion": "~0.5.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "name": "step_13",
+                        "type": "CODE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "array": "{{step_11}}"
+                          },
+                          "sourceCode": {
+                            "code": "export const code = async (inputs) => {\n  // Assuming the array is passed under inputs.array\n  const inputArray = inputs.array;\n\n  // Check if the input is an array\n  if (Array.isArray(inputArray)) {\n    // Convert the array to a string (comma-separated)\n    const resultString = inputArray.join(',\\n');\n\n    // Return the resulting string\n    return resultString;\n  } else {\n    throw new Error('Input is not an array');\n  }\n};\n",
+                            "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                          },
+                          "inputUiInfo": {},
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_16",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "input": "You are a highly experienced and knowledgeable report generator with expertise in creating structured and well-formatted reports. Your task is to generate a well-structured report with a clean tabular format. Ensure that the report is logically organized, concise, and maintains a professional tone suitable for presentation.\n\nInstructions:\n1) The final output should be a table with two columns:\n  1.1) Clause Title: Extract the title from the provided data. It appears after 'Clause and Question - ' and before the colon.\n  1.2) Clause Reference from Contract: Extract the clause reference, which appears after 'Clause Extraction from Contract Response - '.\n2) Ensure that the table is properly aligned, and that rows and columns are uniformly distributed.\n3) Maintain clarity, conciseness, and accuracy throughout the report and Strictly do not add  ``` or ```plaintext, or any other irrelevant data in the output."
+                            },
+                            "pieceName": "@activepieces/piece-inputs",
+                            "pieceType": "CUSTOM",
+                            "actionName": "long_text",
+                            "inputUiInfo": {},
+                            "packageType": "ARCHIVE",
+                            "pieceVersion": "~0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_15",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "auth": "{{trigger.body.auth.apiKey}}",
+                                "model": "gpt-4o",
+                                "messages": [
+                                  {
+                                    "role": "system",
+                                    "content": "{{step_16}}"
+                                  },
+                                  {
+                                    "role": "user",
+                                    "content": "{{step_13}}"
+                                  }
+                                ],
+                                "maxTokens": "2048",
+                                "temperature": "0.5"
+                              },
+                              "pieceName": "@activepieces/piece-zbrain-ai",
+                              "pieceType": "CUSTOM",
+                              "actionName": "models",
+                              "inputUiInfo": {},
+                              "packageType": "ARCHIVE",
+                              "pieceVersion": "~0.0.6",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_20",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "url": "https://app.zbrain.ai:3012/api/worker-records/{{trigger.body.workerRecordId}}",
+                                  "body": {
+                                    "output": {
+                                      "markdown": "{{step_15['content']}}"
+                                    },
+                                    "tenantId": "{{trigger.body.tenantId}}",
+                                    "workerId": "{{trigger.body.workerId}}"
+                                  },
+                                  "method": "PUT",
+                                  "headers": {
+                                    "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                                  },
+                                  "failsafe": false,
+                                  "queryParams": {}
+                                },
+                                "pieceName": "@activepieces/piece-http",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "send_request",
+                                "inputUiInfo": {},
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "~0.3.10",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_1",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "url": "https://app.zbrain.ai:3012/api/worker-trigger",
+                                    "body": {
+                                      "file": "{{trigger.body.file.url}}",
+                                      "input": "{{step_15['content']}}",
+                                      "workerId": "6721f09d3bb1cb0025e755c6"
+                                    },
+                                    "method": "POST",
+                                    "headers": {
+                                      "Authorization": "Bearer za-U2FsdGVkX1/GHBImZ2rply23wCWAvIpgtEEd/zoyEQRiTbQ4Zzp4eObr9A5fgHtM6ZIU442uMhN/uT18YOENXYEARFqDHgcJKc0FAoOvRbA+Fg0bsbvL4OJXC5dE5bCk"
+                                    },
+                                    "failsafe": false,
+                                    "queryParams": {}
+                                  },
+                                  "pieceName": "@activepieces/piece-http",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "send_request",
+                                  "inputUiInfo": {},
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "~0.3.10",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "displayName": "Call Contract Summarization Agent"
+                              },
+                              "displayName": "Send HTTP request"
+                            },
+                            "displayName": "Models"
+                          },
+                          "displayName": "Long text"
+                        },
+                        "displayName": "Array to String"
+                      },
+                      "displayName": "Remove"
+                    },
+                    "displayName": "Get"
+                  },
+                  "displayName": "Loop on Items",
+                  "firstLoopAction": {
+                    "name": "step_5",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "url": "https://app.zbrain.ai:3000/api/view-extracted-data",
+                        "body": {
+                          "knowledgeBaseImportId": "{{step_4['item']['knowledgeBaseImportId']}}"
+                        },
+                        "method": "POST",
+                        "headers": {
+                          "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                        },
+                        "failsafe": false,
+                        "queryParams": {}
+                      },
+                      "pieceName": "@activepieces/piece-http",
+                      "pieceType": "OFFICIAL",
+                      "actionName": "send_request",
+                      "inputUiInfo": {},
+                      "packageType": "REGISTRY",
+                      "pieceVersion": "~0.3.10",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_6",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "url": "{{step_5['body']['responseData']['signedUrl']}}",
+                          "method": "GET",
+                          "headers": {},
+                          "failsafe": false,
+                          "queryParams": {}
+                        },
+                        "pieceName": "@activepieces/piece-http",
+                        "pieceType": "OFFICIAL",
+                        "actionName": "send_request",
+                        "inputUiInfo": {},
+                        "packageType": "REGISTRY",
+                        "pieceVersion": "~0.3.10",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "name": "step_14",
+                        "type": "CODE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "text": "{{step_6['body'][0]['text']}}"
+                          },
+                          "sourceCode": {
+                            "code": "export const code = async (inputs) => {\n  // Extract the input text from inputs\n  const inputText = inputs.text;\n\n  // Use a regular expression to remove '\\n\\n\\n' from the end of the string\n  const cleanedText = inputText.replace(/\\n\\n\\n$/, '');\n\n  // Return the cleaned text\n  return cleanedText;\n};",
+                            "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                          },
+                          "inputUiInfo": {},
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_7",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['zbrain-ai']}}",
+                              "json": true,
+                              "query": "{{step_14}}",
+                              "maxSize": "10000",
+                              "metadata": false,
+                              "summarize": false,
+                              "knowledgeBases": "{{step_18['body']['responseData']['_id']}}"
+                            },
+                            "pieceName": "@activepieces/piece-zbrain-ai",
+                            "pieceType": "CUSTOM",
+                            "actionName": "knowledgebase",
+                            "inputUiInfo": {},
+                            "packageType": "ARCHIVE",
+                            "pieceVersion": "~0.0.6",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_8",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "input": "You are provided with four chunks of a contract text and a question. Your task is to identify whether any of these chunks contain the answer to the question. If the answer is present, extract the exact wording of the line from the chunk. If none of the chunks provide an answer, return 'Not Present'.\n\nInstructions:\n1) If you find the relevant clause or information or matching line is semantically similar, or has minimal difference in any of the chunks, extract and return the exact wording from the chunk.\n2) If the relevant information is not found in any of the four chunks, simply return 'Not Present'."
+                              },
+                              "pieceName": "@activepieces/piece-inputs",
+                              "pieceType": "CUSTOM",
+                              "actionName": "long_text",
+                              "inputUiInfo": {},
+                              "packageType": "ARCHIVE",
+                              "pieceVersion": "~0.0.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_9",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "auth": "{{trigger.body.auth.apiKey}}",
+                                  "model": "gpt-4o",
+                                  "messages": [
+                                    {
+                                      "role": "system",
+                                      "content": "{{step_8}}"
+                                    },
+                                    {
+                                      "role": "user",
+                                      "content": "Question: {{step_6['body'][0]['text']}}, Chunk 1: {{step_7['contexts'][0]['context']}}, Chunk 2: {{step_7['contexts'][1]['context']}}, Chunk 3: {{step_7['contexts'][2]['context']}}, Chunk 4: {{step_7['contexts'][3]['context']}}"
+                                    }
+                                  ],
+                                  "maxTokens": "2048",
+                                  "temperature": "0.5"
+                                },
+                                "pieceName": "@activepieces/piece-zbrain-ai",
+                                "pieceType": "CUSTOM",
+                                "actionName": "models",
+                                "inputUiInfo": {},
+                                "packageType": "ARCHIVE",
+                                "pieceVersion": "~0.0.6",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_10",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "key": "Clauses",
+                                    "value": "1) Clause and Question - {{step_14}}2) Clause Extraction from Contract Response - {{step_9['content']}}",
+                                    "store_scope": "COLLECTION",
+                                    "ignore_if_exists": false
+                                  },
+                                  "pieceName": "@activepieces/piece-store",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "add_to_list",
+                                  "inputUiInfo": {},
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "~0.5.1",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "displayName": "Add To List"
+                              },
+                              "displayName": "Contract Clause Extraction"
+                            },
+                            "displayName": "Clause Extraction Prompt"
+                          },
+                          "displayName": "Chunks related to Clause in Contract"
+                        },
+                        "displayName": "Clean Question"
+                      },
+                      "displayName": "Get Clause Question"
+                    },
+                    "displayName": "Get Signed Url"
+                  }
+                },
+                "displayName": "Unique file name and import id"
+              },
+              "displayName": "Send HTTP request"
+            },
+            "displayName": "Create KB for Input Content"
+          },
+          "displayName": "Get File Name from Input File"
+        },
+        "displayName": "Clause Questions"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

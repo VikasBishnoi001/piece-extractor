@@ -1,6 +1,6 @@
 import re
 from typing import List, Dict, Optional, Union, Any
-from models import Piece, Action, Trigger, Property
+from models import Piece, Action, Trigger, Property, StepSettings, ErrorHandlingOptions
 from utils import clean_typescript_string, extract_object_properties, extract_value_by_key
 
 class PieceParser:
@@ -18,7 +18,7 @@ class PieceParser:
             'Dictionary': 'Dictionary'
         }
 
-    def extract_validation_rules(self, prop_content: str) -> Dict:
+    def extract_validation_rules(self, prop_content: str) -> Optional[Dict]:
         """Extract validation rules from property content."""
         rules = {}
 
@@ -33,7 +33,21 @@ class PieceParser:
             if max_match:
                 rules['maximum'] = max_match.group(1)
 
-        # Extract other validation rules as needed
+        # Extract validation function if present
+        if "validate:" in prop_content:
+            rules['has_validation'] = True
+
+        # Extract options for Select/MultiSelect
+        if "options:" in prop_content:
+            options_match = re.search(r'options:\s*(\[.*?\])', prop_content, re.DOTALL)
+            if options_match:
+                try:
+                    # Clean and parse options string
+                    options_str = options_match.group(1).replace('\n', '').strip()
+                    rules['options'] = options_str
+                except:
+                    pass
+
         return rules if rules else None
 
     def extract_default_value(self, prop_content: str) -> Optional[Any]:
@@ -50,6 +64,29 @@ class PieceParser:
                 return float(value) if '.' in value else int(value)
             return value
         return None
+
+    def extract_settings_template(self, example_data: Dict) -> Optional[StepSettings]:
+        """Extract settings template from flow example data."""
+        if not example_data or not isinstance(example_data, dict):
+            return None
+
+        error_handling = ErrorHandlingOptions()
+        if 'error_handling' in example_data:
+            error_opts = example_data['error_handling']
+            error_handling.retry_on_failure = error_opts.get('retryOnFailure', {}).get('value', False)
+            error_handling.continue_on_failure = error_opts.get('continueOnFailure', {}).get('value', False)
+            error_handling.max_retries = error_opts.get('maxRetries')
+            error_handling.retry_interval = error_opts.get('retryInterval')
+
+        return StepSettings(
+            piece_name=example_data.get('pieceName', ''),
+            piece_version=example_data.get('pieceVersion', '0.0.1'),
+            action_name=example_data.get('actionName', ''),
+            input=example_data.get('input', {}),
+            input_ui_info=example_data.get('inputUiInfo', {}),
+            package_type=example_data.get('packageType', 'REGISTRY'),
+            error_handling=error_handling
+        )
 
     def parse_property(self, prop_name: str, prop_content: str) -> Optional[Property]:
         """Parse a Property definition from TypeScript code."""
@@ -82,6 +119,10 @@ class PieceParser:
             except:
                 pass
 
+        # Extract package type if present
+        package_type_match = re.search(r'packageType:\s*[\'"]([^\'"]+)[\'"]', prop_content)
+        package_type = package_type_match.group(1) if package_type_match else None
+
         return Property(
             name=prop_name,
             display_name=clean_typescript_string(display_name),
@@ -90,7 +131,8 @@ class PieceParser:
             property_type=property_type,
             validation_rules=validation_rules,
             default_value=default_value,
-            input_ui_info=input_ui_info
+            input_ui_info=input_ui_info,
+            package_type=package_type
         )
 
     def parse_component(self, content: str, component_type: str) -> Optional[Union[Action, Trigger]]:
@@ -145,6 +187,13 @@ class PieceParser:
                     if prop:
                         properties.append(prop)
 
+        # Extract trigger type for triggers
+        trigger_type = None
+        if component_type == "Trigger":
+            type_match = re.search(r'type:\s*(\w+)', component_def)
+            if type_match:
+                trigger_type = type_match.group(1)
+
         component_class = Action if component_type == "Action" else Trigger
         return component_class(
             name=clean_typescript_string(name),
@@ -152,7 +201,9 @@ class PieceParser:
             description=clean_typescript_string(description),
             properties=properties,
             piece_version=piece_version,
-            settings_template=None  # This will be populated from flow examples
+            settings_template=None,  # Will be populated later from flow examples
+            trigger_type=trigger_type if component_type == "Trigger" else None,
+            valid=True
         )
 
     def parse_action(self, content: str) -> Optional[Action]:
@@ -203,12 +254,24 @@ class PieceParser:
                 for c in re.findall(r'["\']([^"\']+)["\']', categories_str)
             ]
 
-        # Extract auth type
+        # Extract auth type and settings
         auth_type = None
         if "PieceAuth." in piece_def:
             auth_match = re.search(r'PieceAuth\.(\w+)', piece_def)
             if auth_match:
                 auth_type = auth_match.group(1)
+
+        # Extract piece type and package type
+        piece_type = "OFFICIAL"  # Default value
+        package_type = "REGISTRY"  # Default value
+
+        piece_type_match = re.search(r'pieceType:\s*[\'"]([^\'"]+)[\'"]', piece_def)
+        if piece_type_match:
+            piece_type = piece_type_match.group(1)
+
+        package_type_match = re.search(r'packageType:\s*[\'"]([^\'"]+)[\'"]', piece_def)
+        if package_type_match:
+            package_type = package_type_match.group(1)
 
         return Piece(
             name=clean_typescript_string(display_name).lower().replace(" ", "-"),
@@ -220,5 +283,7 @@ class PieceParser:
             triggers=[],
             authors=authors,
             categories=categories,
-            auth_type=auth_type
+            auth_type=auth_type,
+            package_type=package_type,
+            piece_type=piece_type
         )

@@ -1,0 +1,1155 @@
+{
+  "created": "1737174750970",
+  "updated": "1737174750970",
+  "name": "Vendor Data Validation Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-google-drive",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-http",
+    "@activepieces/piece-store",
+    "@activepieces/piece-utilities"
+  ],
+  "template": {
+    "displayName": "Vendor Data Validation Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": {
+              "input": "{{trigger['body']}}"
+            }
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "json_input",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "~0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_25",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "input": "vendor"
+            },
+            "pieceName": "@activepieces/piece-inputs",
+            "pieceType": "CUSTOM",
+            "actionName": "text_input",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "ARCHIVE",
+            "pieceVersion": "~0.0.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_37",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "input": "failed"
+              },
+              "pieceName": "@activepieces/piece-inputs",
+              "pieceType": "CUSTOM",
+              "actionName": "text_input",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "ARCHIVE",
+              "pieceVersion": "~0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_2",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "auth": "{{connections['google-drive-udesh']}}",
+                  "folderId": "1DTXEMRggYJqPCAGQtyXiPH7ebHc8J5Ek"
+                },
+                "pieceName": "@activepieces/piece-google-drive",
+                "pieceType": "OFFICIAL",
+                "actionName": "list-files",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "pieceVersion": "~0.5.32",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_26",
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "input": [
+                      {
+                        "data": {
+                          "tin": "1029384756",
+                          "trade_license": "TL-987654321 (Valid till 31st December 2025)",
+                          "gst_registration_number": "22ABCDE1234F1Z5",
+                          "certificate_of_incorporation": "INC01234567 (Issued on 15th March 2018)"
+                        },
+                        "section": "Business Registration Documents",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      },
+                      {
+                        "data": {
+                          "government_id": "Passport No. K12345678 (Issued on 20th January 2020, valid till 19th January 2030)",
+                          "authorized_signatory_name": "Rajesh Kumar"
+                        },
+                        "section": "Identity Proof",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      },
+                      {
+                        "data": {
+                          "proof": "Electricity Bill No. DL12345678 (Issued on 1st December 2024)",
+                          "registered_office_address": "45, Industrial Park, Sector 12, New Delhi, India - 110011"
+                        },
+                        "section": "Address Proof",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      },
+                      {
+                        "data": {
+                          "balance_sheet": {
+                            "net_profit": "₹2,50,00,000",
+                            "total_revenue": "₹12,00,00,000"
+                          },
+                          "recent_itr_filing": "Acknowledgment No. 12345678 (Filed for FY 2023-24)",
+                          "bank_account_details": {
+                            "bank_name": "HDFC Bank",
+                            "ifsc_code": "HDFC0001234",
+                            "account_number": "123456789012",
+                            "canceled_cheque": "[Attached Document]"
+                          }
+                        },
+                        "section": "Financial Documents",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      },
+                      {
+                        "data": {
+                          "nda_agreement": "Signed on 15th December 2024",
+                          "iso_certification": "ISO 9001:2015 (Valid till 31st December 2026)"
+                        },
+                        "section": "Compliance and Legal Documents",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      },
+                      {
+                        "data": {
+                          "sample_portfolio": "[Attached photos and descriptions of products]",
+                          "services_provided": [
+                            "Bulk supply of office furniture",
+                            "Custom-made ergonomic chairs"
+                          ]
+                        },
+                        "section": "Product or Service-Specific Documents",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      },
+                      {
+                        "data": {
+                          "liability_insurance": "Policy No. INS123456789 (Valid till 30th June 2025)",
+                          "workers_compensation_insurance": "Policy No. WC123456 (Valid till 31st December 2024)"
+                        },
+                        "section": "Insurance",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      },
+                      {
+                        "data": {
+                          "clients": [
+                            {
+                              "contact": "Mr. Arjun Mehta (+91-9876543210)",
+                              "client_name": "GreenTech Solutions Pvt. Ltd."
+                            },
+                            {
+                              "contact": "Mrs. Shalini Verma (+91-9123456789)",
+                              "client_name": "Alpha Enterprises"
+                            }
+                          ]
+                        },
+                        "section": "References",
+                        "vendor_name": "Stellar Supplies Pvt. Ltd."
+                      }
+                    ]
+                  },
+                  "pieceName": "@activepieces/piece-inputs",
+                  "pieceType": "CUSTOM",
+                  "actionName": "json_input",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "ARCHIVE",
+                  "pieceVersion": "~0.0.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_35",
+                  "type": "PIECE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "input": "You are a helpful assistant. Your task is to validate whether the provided email data contains valid vendor details. Follow these steps:\nAnalyze the Email Data:\nCheck if the email data includes information related to a vendor, such as:\nVendor Name\nVendor ID\nContact Information\nAddress\nAny other relevant vendor-specific details\nValidation Criteria:\nIf the email data contains all necessary vendor-related details, it should be classified as valid vendor information.\nIf the data does not pertain to vendor information, it should be classified as unrelated.\nResponse Format:\nFor Valid Vendor:\nRespond with \"Valid Vendor\" and provide the extracted vendor details in the following JSON format:\n{  \n  \"status\": \"Valid Vendor\",  \n  \"vendorDetails\": {  \n    \"vendorName\": \"Example Vendor\",  \n    \"vendorID\": \"12345\",  \n    \"contact\": \"vendor@example.com\",  \n    \"address\": \"123 Vendor Street, City, Country\"  \n  }  \n}  \nFor Non-Vendor Information:\nRespond with \"This is not related to vendor\".\nImportant Notes:\nEnsure accuracy when extracting and validating vendor details.\nDo not assume missing information. Only validate based on the provided data.\nRespond concisely and strictly follow the output formats above."
+                    },
+                    "pieceName": "@activepieces/piece-inputs",
+                    "pieceType": "CUSTOM",
+                    "actionName": "long_text",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "ARCHIVE",
+                    "pieceVersion": "~0.0.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_15",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "auth": "{{connections['zbrain-ai']}}",
+                        "model": "gpt-4",
+                        "messages": [
+                          {
+                            "role": "system",
+                            "content": "{{step_35}}"
+                          },
+                          {
+                            "role": "user",
+                            "content": "Email Data: {{step_26}}"
+                          }
+                        ],
+                        "maxTokens": "2048",
+                        "temperature": "0.5"
+                      },
+                      "pieceName": "@activepieces/piece-zbrain-ai",
+                      "pieceType": "CUSTOM",
+                      "actionName": "models",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "ARCHIVE",
+                      "pieceVersion": "~0.0.7",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_18",
+                      "type": "ROUTER",
+                      "valid": true,
+                      "children": [
+                        {
+                          "name": "step_19",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "body": {
+                                "status": 500,
+                                "response": "data not found"
+                              },
+                              "status": "200",
+                              "headers": {}
+                            },
+                            "pieceName": "@activepieces/piece-http",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "return_response",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "~0.3.10",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "displayName": "Return Response"
+                        },
+                        {
+                          "name": "step_20",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "key": "{{step_25}}",
+                              "store_scope": "COLLECTION"
+                            },
+                            "pieceName": "@activepieces/piece-store",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "remove_value",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "~0.5.3",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_6",
+                            "type": "LOOP_ON_ITEMS",
+                            "valid": true,
+                            "settings": {
+                              "items": "{{step_2['files']}}",
+                              "inputUiInfo": {}
+                            },
+                            "nextAction": {
+                              "name": "step_11",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "url": "https://app.zbrain.ai:3000/api/knowledge-base/67653efc482ff702284c7ee4",
+                                  "method": "GET",
+                                  "headers": {
+                                    "Authorization": "za-U2FsdGVkX1/GHBImZ2rply23wCWAvIpgtEEd/zoyEQRiTbQ4Zzp4eObr9A5fgHtM6ZIU442uMhN/uT18YOENXYEARFqDHgcJKc0FAoOvRbA+Fg0bsbvL4OJXC5dE5bCk"
+                                  },
+                                  "failsafe": false,
+                                  "queryParams": {}
+                                },
+                                "pieceName": "@activepieces/piece-http",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "send_request",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "~0.3.10",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_12",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "url": "https://app.zbrain.ai:3000/api/view-extracted-data",
+                                    "body": {
+                                      "knowledgeBaseImportId": "{{step_11['body']['responseData']['knowledgeBaseImports'][0]['_id']}}"
+                                    },
+                                    "method": "POST",
+                                    "headers": {
+                                      "Authorization": "za-U2FsdGVkX1/GHBImZ2rply23wCWAvIpgtEEd/zoyEQRiTbQ4Zzp4eObr9A5fgHtM6ZIU442uMhN/uT18YOENXYEARFqDHgcJKc0FAoOvRbA+Fg0bsbvL4OJXC5dE5bCk"
+                                    },
+                                    "failsafe": false,
+                                    "queryParams": {
+                                      "importType": "WEBSITE",
+                                      "knowledgeBaseId": "{{step_11['body']['responseData']['knowledgeBaseImports'][0]['knowledgeBaseId']}}"
+                                    }
+                                  },
+                                  "pieceName": "@activepieces/piece-http",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "send_request",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "~0.3.10",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "name": "step_13",
+                                  "type": "PIECE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "url": "{{step_12['body']['responseData']['signedUrl']}}",
+                                      "method": "GET",
+                                      "headers": {},
+                                      "failsafe": false,
+                                      "queryParams": {}
+                                    },
+                                    "pieceName": "@activepieces/piece-http",
+                                    "pieceType": "OFFICIAL",
+                                    "actionName": "send_request",
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "packageType": "REGISTRY",
+                                    "pieceVersion": "~0.3.10",
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "name": "step_14",
+                                    "type": "CODE",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "data": "{{step_13}}"
+                                      },
+                                      "sourceCode": {
+                                        "code": "export const code = async (inputs) => {\n    const combinedText = combineBodyText(inputs.data);\n  return combinedText;\n};\n\n\nfunction combineBodyText(response: {\n  status: number;\n  headers: Record<string, string>;\n  body: { text: string; extra_info: Record<string, any> }[];\n}): string {\n  return response.body.map(item => item.text).join(\"\\n\");\n}",
+                                        "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                      },
+                                      "inputUiInfo": {},
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "nextAction": {
+                                      "name": "step_28",
+                                      "type": "PIECE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "key": "{{step_25}}",
+                                          "store_scope": "COLLECTION"
+                                        },
+                                        "pieceName": "@activepieces/piece-store",
+                                        "pieceType": "OFFICIAL",
+                                        "actionName": "get",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "pieceVersion": "~0.5.4",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "name": "step_23",
+                                        "type": "CODE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "data": "{{step_28}}"
+                                          },
+                                          "sourceCode": {
+                                            "code": "export const code = async (inputs) => {\n \nconst result = convertListToString(inputs.data);\nreturn result;\n\n};\n\nconst convertListToString = (data: string[]): string => {\n  return data.map(item => JSON.stringify(JSON.parse(item), null, 2)).join('\\n\\n');\n};\n",
+                                            "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                          },
+                                          "inputUiInfo": {},
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "name": "step_30",
+                                          "type": "PIECE",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "input": "\"You are a vendor data validator. Please follow the validation rules for all the provided vendor data. Ensure that each field complies with the following guidelines:\\n\\n### Vendor Information Validation:\\n\\n1. **Vendor Name:** Must be a non-empty string containing only alphabetic characters and spaces. It should not exceed 100 characters.\\n\\n2. **Email Address:** Must match a valid email format (e.g., vendor@example.com).\\n\\n3. **Phone Number:** Must be a valid number format, including country code, and should contain 8 to 15 digits.\\n\\n### Address Validation:\\n\\n4. **Street Address:** Must be a non-empty string and not exceed 200 characters.\\n\\n5. **City and State:** Both fields must contain only alphabetic characters and spaces.\\n\\n6. **Zip/Postal Code:** Must match the postal code format for the country.\\n\\n### Company Information Validation:\\n\\n7. **Registration Number:** Must be alphanumeric and match the format specific to the country (e.g., XYZ-123456).\\n\\n8. **Tax ID:** Must follow the required format for tax identification in the vendor’s country.\\n\\n9. **Business License:** Must be provided as a valid file (PDF or image format) or contain a reference number.\\n\\n### Financial Details Validation:\\n\\n10. **Bank Account Number:** Must be numeric or alphanumeric, depending on the country norms, and match bank format requirements.\\n\\n11. **SWIFT Code:** Must match the 8-11 character format for international bank codes (if applicable).\\n\\n12. **Payment Capability Proof:** Must include a valid bank statement or equivalent document uploaded as a PDF.\\n\\n### Compliance Check:\\n\\n13. **Certifications:** Must include relevant industry certifications as PDF or document links (e.g., ISO, environmental certifications).\\n\\n14. **Legal Compliance:** The vendor must provide declarations for compliance with applicable laws (e.g., GDPR, AML).\\n\\n### Logical Validations:\\n\\n15. **Mandatory Fields:** No required field can be empty or null.\\n\\n16. **Consistency:** Data such as address, phone, and bank details must not conflict with other data fields. For instance, the address's country must align with the bank’s SWIFT code.\\n\\n17. **Date Validation:** Documents such as licenses or certifications must not have expired.\\n\\n### Additional Requirements:\\n\\n18. **Vendor Name and Document Validation Date:** Ensure that the vendor name and any documents provided (e.g., business registration, tax ID) are valid and current.\\n\\n### Important Notes:\\n\\n- **Do Not Assume Any Values:** Validate based strictly on the data provided by the user.\\n\\n- **Verify All Fields Carefully:** Ensure consistency across all data fields (e.g., the address country should match the bank's SWIFT code).\\n\\n- **No Inference:** Only use the data provided by the user. Do not infer or assume missing data.\\n\\nPlease check all provided data accordingly and provide the verification result."
+                                            },
+                                            "pieceName": "@activepieces/piece-inputs",
+                                            "pieceType": "CUSTOM",
+                                            "actionName": "long_text",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "ARCHIVE",
+                                            "pieceVersion": "~0.0.1",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "name": "step_17",
+                                            "type": "PIECE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "auth": "{{connections['zbrain-ai']}}",
+                                                "model": "gpt-4",
+                                                "messages": [
+                                                  {
+                                                    "role": "system",
+                                                    "content": "You are a vendor data validator. Your task is to validate the data provided by the user. The data must comply with all the rules outlined in {{step_16}}. Ensure strict adherence to these rules and provide clear feedback if any issues are identified."
+                                                  },
+                                                  {
+                                                    "role": "user",
+                                                    "content": "{{step_23}}"
+                                                  }
+                                                ],
+                                                "maxTokens": "2048",
+                                                "temperature": "0.5"
+                                              },
+                                              "pieceName": "@activepieces/piece-zbrain-ai",
+                                              "pieceType": "CUSTOM",
+                                              "actionName": "models",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "packageType": "ARCHIVE",
+                                              "pieceVersion": "~0.0.7",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "displayName": "Vendor Data"
+                                          },
+                                          "displayName": "Long text"
+                                        },
+                                        "displayName": "List to String"
+                                      },
+                                      "displayName": "Get"
+                                    },
+                                    "displayName": "Code"
+                                  },
+                                  "displayName": "KB Data"
+                                },
+                                "displayName": "Signed URL"
+                              },
+                              "displayName": "Get KB"
+                            },
+                            "displayName": "Loop on Attachments",
+                            "firstLoopAction": {
+                              "name": "step_31",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "key": "{{step_37}}",
+                                  "store_scope": "FLOW",
+                                  "defaultValue": "false"
+                                },
+                                "pieceName": "@activepieces/piece-store",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "get",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "~0.5.4",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_33",
+                                "type": "ROUTER",
+                                "valid": true,
+                                "children": [
+                                  {
+                                    "name": "step_36",
+                                    "type": "PIECE",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "body": {
+                                          "response": "This is Failed"
+                                        },
+                                        "status": "200",
+                                        "headers": {}
+                                      },
+                                      "pieceName": "@activepieces/piece-http",
+                                      "pieceType": "OFFICIAL",
+                                      "actionName": "return_response",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "pieceVersion": "~0.3.10",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "displayName": "Return Response"
+                                  },
+                                  {
+                                    "name": "step_7",
+                                    "type": "PIECE",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "auth": "{{connections['google-drive-udesh']}}",
+                                        "fileId": "{{step_6['item']['id']}}"
+                                      },
+                                      "pieceName": "@activepieces/piece-google-drive",
+                                      "pieceType": "OFFICIAL",
+                                      "actionName": "read-file",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "pieceVersion": "~0.5.32",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "nextAction": {
+                                      "name": "step_24",
+                                      "type": "PIECE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "dpi": "300",
+                                          "file": "{{step_7}}",
+                                          "pages": "ALL"
+                                        },
+                                        "pieceName": "@activepieces/piece-utilities",
+                                        "pieceType": "CUSTOM",
+                                        "actionName": "pdf_to_images",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "ARCHIVE",
+                                        "pieceVersion": "~0.2.12",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "name": "step_22",
+                                        "type": "CODE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "image": "{{step_24}}"
+                                          },
+                                          "sourceCode": {
+                                            "code": "export const code = async (inputs) => {\n  return transformList(inputs.image);\n};\n\ninterface InputItem {\n  file: string;\n  name: string;\n  page: number;\n}\n\ninterface OutputItem {\n  type: string;\n  image_url: {\n    url: string;\n  };\n}\n\nfunction transformList(inputList: InputItem[]): OutputItem[] {\n  return inputList.map(item => ({\n    type: \"image_url\",\n    image_url: {\n      url: item.file,\n    },\n  }));\n}",
+                                            "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                          },
+                                          "inputUiInfo": {},
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "name": "step_8",
+                                          "type": "PIECE",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "auth": "{{connections['zbrain-ai']}}",
+                                              "model": "gpt-4o",
+                                              "messages": [
+                                                {
+                                                  "role": "system",
+                                                  "content": "You are tasked with extracting all the text present in the image provided by the user. The output should **only** include the extracted text from the image without any additional response or indicators. Ensure that all the text in the image is captured accurately, and return it as JSON data."
+                                                },
+                                                {
+                                                  "role": "user",
+                                                  "content": "{{step_22}}"
+                                                }
+                                              ],
+                                              "maxTokens": "2048",
+                                              "temperature": "0.5"
+                                            },
+                                            "pieceName": "@activepieces/piece-zbrain-ai",
+                                            "pieceType": "CUSTOM",
+                                            "actionName": "models",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "ARCHIVE",
+                                            "pieceVersion": "~0.0.7",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "name": "step_10",
+                                            "type": "CODE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "data": "{{step_8['content']}}"
+                                              },
+                                              "sourceCode": {
+                                                "code": "export const code = async (inputs) => {\n     const jsonMatch = inputs.data.match(/```json\\n([\\s\\S]*?)\\n```/);\n    if (jsonMatch && jsonMatch[1]) {\n      // Parse and return the JSON data\n      return JSON.parse(jsonMatch[1]);\n    }\n  return null;\n};\n\n",
+                                                "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                              },
+                                              "inputUiInfo": {},
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "nextAction": {
+                                              "name": "step_21",
+                                              "type": "PIECE",
+                                              "valid": true,
+                                              "settings": {
+                                                "input": {
+                                                  "auth": "{{connections['zbrain-ai']}}",
+                                                  "model": "gpt-4o",
+                                                  "messages": [
+                                                    {
+                                                      "role": "system",
+                                                      "content": "You are a helpful assistant. Your task is to validate if the provided email data contains valid vendor details. If the data includes valid vendor information, respond with 'Valid Vendor' and provide the extracted vendor details in JSON format. If the data is not related to vendor information, respond with 'This is not related to vendor'."
+                                                    },
+                                                    {
+                                                      "role": "user",
+                                                      "content": "Vendor Data: {{step_10}}"
+                                                    }
+                                                  ],
+                                                  "maxTokens": "2048",
+                                                  "temperature": "0.5"
+                                                },
+                                                "pieceName": "@activepieces/piece-zbrain-ai",
+                                                "pieceType": "CUSTOM",
+                                                "actionName": "models",
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {}
+                                                },
+                                                "packageType": "ARCHIVE",
+                                                "pieceVersion": "~0.0.7",
+                                                "errorHandlingOptions": {
+                                                  "retryOnFailure": {
+                                                    "value": false
+                                                  },
+                                                  "continueOnFailure": {
+                                                    "value": false
+                                                  }
+                                                }
+                                              },
+                                              "nextAction": {
+                                                "name": "step_32",
+                                                "type": "ROUTER",
+                                                "valid": true,
+                                                "children": [
+                                                  {
+                                                    "name": "step_34",
+                                                    "type": "PIECE",
+                                                    "valid": true,
+                                                    "settings": {
+                                                      "input": {
+                                                        "key": "{{step_37}}",
+                                                        "value": "True",
+                                                        "store_scope": "FLOW"
+                                                      },
+                                                      "pieceName": "@activepieces/piece-store",
+                                                      "pieceType": "OFFICIAL",
+                                                      "actionName": "put",
+                                                      "inputUiInfo": {
+                                                        "customizedInputs": {}
+                                                      },
+                                                      "packageType": "REGISTRY",
+                                                      "pieceVersion": "~0.5.4",
+                                                      "errorHandlingOptions": {
+                                                        "retryOnFailure": {
+                                                          "value": false
+                                                        },
+                                                        "continueOnFailure": {
+                                                          "value": false
+                                                        }
+                                                      }
+                                                    },
+                                                    "nextAction": {
+                                                      "name": "step_9",
+                                                      "type": "PIECE",
+                                                      "valid": true,
+                                                      "settings": {
+                                                        "input": {
+                                                          "body": {
+                                                            "response": "{{step_21['content']}}"
+                                                          },
+                                                          "status": "200",
+                                                          "headers": {}
+                                                        },
+                                                        "pieceName": "@activepieces/piece-http",
+                                                        "pieceType": "OFFICIAL",
+                                                        "actionName": "return_response",
+                                                        "inputUiInfo": {
+                                                          "customizedInputs": {}
+                                                        },
+                                                        "packageType": "REGISTRY",
+                                                        "pieceVersion": "~0.3.10",
+                                                        "errorHandlingOptions": {
+                                                          "retryOnFailure": {
+                                                            "value": false
+                                                          },
+                                                          "continueOnFailure": {
+                                                            "value": false
+                                                          }
+                                                        }
+                                                      },
+                                                      "displayName": "Return Response"
+                                                    },
+                                                    "displayName": "Put"
+                                                  },
+                                                  {
+                                                    "name": "step_27",
+                                                    "type": "PIECE",
+                                                    "valid": true,
+                                                    "settings": {
+                                                      "input": {
+                                                        "key": "{{step_25}}",
+                                                        "value": "{{step_10}}",
+                                                        "store_scope": "COLLECTION",
+                                                        "ignore_if_exists": false
+                                                      },
+                                                      "pieceName": "@activepieces/piece-store",
+                                                      "pieceType": "OFFICIAL",
+                                                      "actionName": "add_to_list",
+                                                      "inputUiInfo": {
+                                                        "customizedInputs": {}
+                                                      },
+                                                      "packageType": "REGISTRY",
+                                                      "pieceVersion": "~0.5.4",
+                                                      "errorHandlingOptions": {
+                                                        "retryOnFailure": {
+                                                          "value": false
+                                                        },
+                                                        "continueOnFailure": {
+                                                          "value": false
+                                                        }
+                                                      }
+                                                    },
+                                                    "nextAction": {
+                                                      "name": "step_16",
+                                                      "type": "PIECE",
+                                                      "valid": true,
+                                                      "settings": {
+                                                        "input": {
+                                                          "input": "The following vendor details must be provided and verified for the vendor to be considered for approval. Incomplete or inaccurate submissions will result in delays or rejection of the verification process.\n2.1 Vendor Contact Information\nName: Full legal name of the vendor or company. If a business, the name should match official business registration.\nEmail Address: Must be a valid and operational email address. This will be used for communication and notifications.\nPhone Number: A valid, working phone number with country code. Verification will be done via OTP or phone call.\nAddress: A complete physical address including street, city, state, country, and zip code. Verification may involve cross-checking official records such as utility bills or government-issued identification.\n2.2 Company Information\nCompany Name: Legal name of the business entity as registered with local authorities.\nBusiness Registration Number: Official business registration number issued by the government.\nTax Identification Number (TIN): A valid tax ID issued by the relevant tax authority.\nBusiness License/Permit: A copy of business licenses or permits relevant to the operations in the jurisdiction.\n2.3 Financial Information\nBank Account Details: Accurate bank details including account number, bank name, branch, SWIFT code (for international payments), and account type.\nProof of Payment Capability: A valid, official document such as a bank statement or financial report verifying the vendor's ability to accept payments.\nBank Reference: A reference letter from the bank to confirm account standing may be requested for higher-value transactions.\n2.4 Compliance and Certifications\nLegal Compliance: The vendor must comply with local, national, and international regulations, such as anti-money laundering (AML) laws, data protection regulations (e.g., GDPR, CCPA), and industry-specific regulations.\nCertifications: Any relevant certifications must be provided, including ISO, FDA, environmental, or other industry-specific certifications.\nConflict of Interest Declaration: The vendor should declare any potential conflicts of interest, particularly when bidding for public contracts or dealing with sensitive information.\n2.5 Product/Service Verification\nProduct/Service List: A detailed list of products/services provided by the vendor, including descriptions, specifications, and quantities.\nQuality Assurance: Proof of product/service quality, such as inspection reports, quality control certifications, or industry standards that apply to the goods or services.\n\t•\t\t•\tWarranty or Support Terms: Documentation outlining warranty periods, after-sales support, and return policies. This ensures the vendor provides reliable after-purchase services."
+                                                        },
+                                                        "pieceName": "@activepieces/piece-inputs",
+                                                        "pieceType": "CUSTOM",
+                                                        "actionName": "long_text",
+                                                        "inputUiInfo": {
+                                                          "customizedInputs": {}
+                                                        },
+                                                        "packageType": "ARCHIVE",
+                                                        "pieceVersion": "~0.0.1",
+                                                        "errorHandlingOptions": {
+                                                          "retryOnFailure": {
+                                                            "value": false
+                                                          },
+                                                          "continueOnFailure": {
+                                                            "value": false
+                                                          }
+                                                        }
+                                                      },
+                                                      "displayName": "Long text"
+                                                    },
+                                                    "displayName": "Add To List"
+                                                  }
+                                                ],
+                                                "settings": {
+                                                  "branches": [
+                                                    {
+                                                      "branchName": "On Success",
+                                                      "branchType": "CONDITION",
+                                                      "conditions": [
+                                                        [
+                                                          {
+                                                            "operator": "TEXT_CONTAINS",
+                                                            "firstValue": "{{step_21['content']}}",
+                                                            "secondValue": "This is not related to vendor",
+                                                            "caseSensitive": false
+                                                          }
+                                                        ]
+                                                      ]
+                                                    },
+                                                    {
+                                                      "branchName": "Otherwise",
+                                                      "branchType": "FALLBACK"
+                                                    }
+                                                  ],
+                                                  "inputUiInfo": {},
+                                                  "executionType": "EXECUTE_FIRST_MATCH"
+                                                },
+                                                "displayName": "Branch"
+                                              },
+                                              "displayName": "Extract Vendor specific Data"
+                                            },
+                                            "displayName": "Code"
+                                          },
+                                          "displayName": "Extract Image Data"
+                                        },
+                                        "displayName": "Extract image"
+                                      },
+                                      "displayName": "PDF to Images"
+                                    },
+                                    "displayName": "Read file"
+                                  }
+                                ],
+                                "settings": {
+                                  "branches": [
+                                    {
+                                      "branchName": "On Success",
+                                      "branchType": "CONDITION",
+                                      "conditions": [
+                                        [
+                                          {
+                                            "operator": "BOOLEAN_IS_FALSE",
+                                            "firstValue": "{{step_31}}"
+                                          }
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "branchName": "Otherwise",
+                                      "branchType": "FALLBACK"
+                                    }
+                                  ],
+                                  "inputUiInfo": {},
+                                  "executionType": "EXECUTE_FIRST_MATCH"
+                                },
+                                "displayName": "Check if LLM Failed Any attachment data"
+                              },
+                              "displayName": "Get Failed"
+                            }
+                          },
+                          "displayName": "Remove"
+                        }
+                      ],
+                      "settings": {
+                        "branches": [
+                          {
+                            "branchName": "On Success",
+                            "branchType": "CONDITION",
+                            "conditions": [
+                              [
+                                {
+                                  "operator": "TEXT_CONTAINS",
+                                  "firstValue": "{{step_15['content']}}",
+                                  "secondValue": "This is not related to vendor",
+                                  "caseSensitive": false
+                                }
+                              ]
+                            ]
+                          },
+                          {
+                            "branchName": "Otherwise",
+                            "branchType": "FALLBACK"
+                          }
+                        ],
+                        "inputUiInfo": {},
+                        "executionType": "EXECUTE_FIRST_MATCH"
+                      },
+                      "nextAction": {
+                        "name": "step_3",
+                        "type": "PIECE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "auth": "{{trigger.body.auth.apiKey}}",
+                            "agentId": "[[content_extraction_agent]]"
+                          },
+                          "pieceName": "@activepieces/piece-zbrain-ai",
+                          "pieceType": "CUSTOM",
+                          "actionName": "agent",
+                          "inputUiInfo": {},
+                          "packageType": "ARCHIVE",
+                          "pieceVersion": "~0.0.7",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_5",
+                          "type": "PIECE",
+                          "valid": false,
+                          "settings": {
+                            "input": {
+                              "apiKey": "{{trigger.body.auth.apiKey}}",
+                              "tenantId": "{{trigger.body.tenantId}}",
+                              "workerId": "{{trigger.body.workerId}}",
+                              "workerRecordId": "{{trigger.body.workerRecordId}}"
+                            },
+                            "pieceName": "@activepieces/piece-utilities",
+                            "pieceType": "CUSTOM",
+                            "actionName": "agent_output",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "ARCHIVE",
+                            "pieceVersion": "~0.2.12",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "displayName": "Advanced Agent Dashboard Settings"
+                        },
+                        "displayName": "Agent"
+                      },
+                      "displayName": "Check Vendor"
+                    },
+                    "displayName": "Check If Vaild Vendor Mail"
+                  },
+                  "displayName": "Prompt"
+                },
+                "displayName": "Json"
+              },
+              "displayName": "List files"
+            },
+            "displayName": "Local Storage Key For failed"
+          },
+          "displayName": "Local Storage Key"
+        },
+        "displayName": "Inputs"
+      }
+    },
+    "valid": false,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

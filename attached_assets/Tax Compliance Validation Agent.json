@@ -1,0 +1,409 @@
+{
+  "created": "1737174711608",
+  "updated": "1737174711608",
+  "name": "Tax Compliance Validation Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-jira-cloud",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-utilities"
+  ],
+  "template": {
+    "displayName": "Tax Compliance Validation Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": {
+              "input": "{{trigger['body']}}"
+            }
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "json_input",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_2",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "url": {
+                "url": "https://leewayhertz.atlassian.net/rest/api/3/search"
+              },
+              "auth": "{{connections['jira-deepak']}}",
+              "body": {
+                "jql": "Project = OM AND issuekey IN (OM-40, OM-44)",
+                "fields": [
+                  "summary",
+                  "status",
+                  "assignee",
+                  "created",
+                  "description",
+                  "attachment",
+                  "customfield_12774",
+                  "customfield_12777",
+                  "customfield_12775",
+                  "customfield_12778"
+                ],
+                "startAt": 0,
+                "maxResults": 1
+              },
+              "method": "POST",
+              "headers": {},
+              "failsafe": false,
+              "queryParams": {
+                "maxResults": "1"
+              }
+            },
+            "pieceName": "@activepieces/piece-jira-cloud",
+            "pieceType": "OFFICIAL",
+            "actionName": "custom_api_call",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "REGISTRY",
+            "pieceVersion": "0.0.11",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_6",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "input": "You are a helpful assistant. You are given a response received from the Jira API. Convert this response into human-readable content. Use the following mappings to interpret the fields:\nsummary: Issue Summary\nstatus: Issue Status\nassignee: Assigned To\ncreated: Date Created\ndescription: Issue Description\nattachment: Attachments\ncustomfield_12774: Custom Field 12774\ncustomfield_12777: Custom Field 12777\ncustomfield_12775: Shipping Address\ncustomfield_12278: Billing Address\nStrictly format the output based only on the provided fields and their corresponding values from the input. Do not generate additional information or provide the output in markdown format."
+              },
+              "pieceName": "@activepieces/piece-inputs",
+              "pieceType": "CUSTOM",
+              "actionName": "text_input",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_4",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "auth": "{{connections['zbrain-ai']}}",
+                  "model": "gpt-4o",
+                  "messages": [
+                    {
+                      "role": "system",
+                      "content": "{{step_6}}"
+                    },
+                    {
+                      "role": "user",
+                      "content": "{{step_2['body']['issues'][0]['fields']['customfield_12778']}}{{step_2['body']['issues'][0]['fields']['summary']}}{{step_2['body']['issues'][0]['fields']['customfield_12777']}}{{step_2['body']['issues'][0]['fields']['created']}}{{step_2['body']['issues'][0]['fields']['customfield_12774']}}{{step_2['body']['issues'][0]['fields']['status']}}{{step_2['body']['issues'][0]['fields']['customfield_12775']}}{{step_2['body']['issues'][0]['fields']['description']}}"
+                    }
+                  ],
+                  "maxTokens": "2048",
+                  "temperature": "0.5"
+                },
+                "pieceName": "@activepieces/piece-zbrain-ai",
+                "pieceType": "CUSTOM",
+                "actionName": "models",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "ARCHIVE",
+                "pieceVersion": "0.0.7",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_3",
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "input": "{{step_4['content']}}"
+                  },
+                  "pieceName": "@activepieces/piece-inputs",
+                  "pieceType": "CUSTOM",
+                  "actionName": "text_input",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "ARCHIVE",
+                  "pieceVersion": "0.0.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_7",
+                  "type": "PIECE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['zbrain-ai']}}",
+                      "model": "gpt-4o",
+                      "messages": [
+                        {
+                          "role": "system",
+                          "content": "You are an AI assistant tasked with converting Jira ticket data into a structured JSON format. Based on the provided input, generate the following JSON object with the exact fields and formatting, strictly dont provide output in ```json format"
+                        },
+                        {
+                          "role": "user",
+                          "content": "jira ticket: {{step_3}}"
+                        }
+                      ],
+                      "maxTokens": "2048",
+                      "temperature": "0.5"
+                    },
+                    "pieceName": "@activepieces/piece-zbrain-ai",
+                    "pieceType": "CUSTOM",
+                    "actionName": "models",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "ARCHIVE",
+                    "pieceVersion": "0.0.7",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_8",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "input": "You are a Tax Validation Agent with access to a comprehensive Taxation Knowledge Base (KB). Your task is to verify if the tax applied to an order is accurate based on the taxation rules outlined in the KB.\nValidation Checklist:\nVerify if the correct tax rates (e.g., VAT, GST, Sales Tax) have been applied based on the product type, shipping address, and billing address.\nCheck if any exemptions or special rules (e.g., software, digital services, enterprise licensing) are applicable.\nEnsure tax is correctly calculated on the subtotal amount before applying any discounts or additional charges.\nValidate if shipping charges, if applicable, are taxed correctly or are exempt based on the rules.\nCross-reference region-specific tax regulations (e.g., California state tax rates, EU VAT rules) if specified."
+                      },
+                      "pieceName": "@activepieces/piece-inputs",
+                      "pieceType": "CUSTOM",
+                      "actionName": "text_input",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "ARCHIVE",
+                      "pieceVersion": "0.0.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_9",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "auth": "{{connections['zbrain-ai']}}",
+                          "json": false,
+                          "query": "{{step_8}}",
+                          "maxSize": "4660",
+                          "metadata": false,
+                          "summarize": false,
+                          "knowledgeBases": [
+                            "6766777cdf7aac022848a37d"
+                          ]
+                        },
+                        "pieceName": "@activepieces/piece-zbrain-ai",
+                        "pieceType": "CUSTOM",
+                        "actionName": "knowledgebase",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "ARCHIVE",
+                        "pieceVersion": "0.0.7",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "name": "step_10",
+                        "type": "PIECE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "auth": "{{connections['zbrain-ai']}}",
+                            "model": "gpt-4o",
+                            "messages": [
+                              {
+                                "role": "system",
+                                "content": "Refer to the Knowledge Base containing taxation rules, including regional tax rates, applicable charges, and exemptions. Analyze the provided order details, including product prices, quantities, shipping costs, and applied taxes. Validate if the tax calculation aligns with the rules in the Knowledge Base. Highlight any discrepancies, provide corrected calculations if errors are found, and explain the reasoning behind your assessment. "
+                              },
+                              {
+                                "role": "user",
+                                "content": "kb rules: {{step_9['contexts']}}, jira ticket: {{step_3}} "
+                              }
+                            ],
+                            "maxTokens": "2048",
+                            "temperature": "0.5"
+                          },
+                          "pieceName": "@activepieces/piece-zbrain-ai",
+                          "pieceType": "CUSTOM",
+                          "actionName": "models",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "ARCHIVE",
+                          "pieceVersion": "0.0.7",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_11",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "input": "{{step_10['content']}}"
+                            },
+                            "pieceName": "@activepieces/piece-inputs",
+                            "pieceType": "CUSTOM",
+                            "actionName": "text_input",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "ARCHIVE",
+                            "pieceVersion": "0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_5",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "apiKey": "{{trigger.body.auth.apiKey}}",
+                                "output": "{{step_11}}",
+                                "tenantId": "{{trigger.body.tenantId}}",
+                                "workerId": "{{trigger.body.workerId}}",
+                                "workerRecordId": "{{trigger.body.workerRecordId}}"
+                              },
+                              "pieceName": "@activepieces/piece-utilities",
+                              "pieceType": "CUSTOM",
+                              "actionName": "agent_output",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "ARCHIVE",
+                              "pieceVersion": "0.2.12",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "displayName": "Advanced Agent Dashboard Settings"
+                          },
+                          "displayName": "Fetch Taxation Rules from KB Copy"
+                        },
+                        "displayName": "Models"
+                      },
+                      "displayName": "Knowledge Bases"
+                    },
+                    "displayName": "Fetch Taxation Rules from KB"
+                  },
+                  "displayName": "Models"
+                },
+                "displayName": "Ticket Info"
+              },
+              "displayName": "LLM call to fetch info"
+            },
+            "displayName": "Prompt"
+          },
+          "displayName": "Fetch Jira Ticket"
+        },
+        "displayName": "Inputs"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

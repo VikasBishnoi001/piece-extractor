@@ -1,0 +1,447 @@
+{
+  "created": "1736244973886",
+  "updated": "1736244973886",
+  "name": "Redundancy Detection Guardrail Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-store",
+    "@activepieces/piece-utilities",
+    "@activepieces/piece-zbrain-ai"
+  ],
+  "blogUrl": "",
+  "template": {
+    "displayName": "Redundancy Detection Guardrail Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": "{{trigger.body.file.content}}"
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "long_text",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_3",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "chunks",
+              "store_scope": "COLLECTION"
+            },
+            "pieceName": "@activepieces/piece-store",
+            "pieceType": "OFFICIAL",
+            "actionName": "remove_value",
+            "inputUiInfo": {},
+            "packageType": "REGISTRY",
+            "pieceVersion": "0.5.4",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_6",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "text": "{{step_1}}",
+                "encoder": "cl100k_base"
+              },
+              "pieceName": "@activepieces/piece-utilities",
+              "pieceType": "CUSTOM",
+              "actionName": "tokenizer",
+              "inputUiInfo": {},
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.2.12",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_7",
+              "type": "BRANCH",
+              "valid": true,
+              "settings": {
+                "conditions": [
+                  [
+                    {
+                      "operator": "NUMBER_IS_GREATER_THAN",
+                      "firstValue": "{{step_6['tokens']}}",
+                      "secondValue": "4000"
+                    }
+                  ]
+                ],
+                "inputUiInfo": {}
+              },
+              "nextAction": {
+                "name": "step_14",
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "key": "chunks",
+                    "store_scope": "COLLECTION"
+                  },
+                  "pieceName": "@activepieces/piece-store",
+                  "pieceType": "OFFICIAL",
+                  "actionName": "remove_value",
+                  "inputUiInfo": {},
+                  "packageType": "REGISTRY",
+                  "pieceVersion": "0.5.4",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "displayName": "Remove"
+              },
+              "displayName": "Branch",
+              "onFailureAction": {
+                "name": "step_2",
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "input": "You are a Redundancy Detection and Elimination Agent. Your sole objective is to identify and eliminate redundancy in the provided text while ensuring clarity and preserving its original meaning.\n\n\n#Guidelines:\n\nOutput Requirements:\nProvide only the revised version of the input text.\nDo not include explanations, summaries, or notes in the output.\n\nKey Rules:\nDetect and remove repetitive phrases, sentences, or ideas.\nEnsure the text is concise, clear, and unique, while maintaining the original tone and intent.\nAvoid over-compacting the text, ensuring natural readability.\n\nFocus:\nRetain the core meaning and purpose of the content.\nDo not include anything other than the improved text."
+                  },
+                  "pieceName": "@activepieces/piece-inputs",
+                  "pieceType": "CUSTOM",
+                  "actionName": "text_input",
+                  "inputUiInfo": {},
+                  "packageType": "ARCHIVE",
+                  "pieceVersion": "0.0.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_10",
+                  "type": "PIECE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['zbrain-ai']}}",
+                      "model": "gpt-4o",
+                      "messages": [
+                        {
+                          "role": "system",
+                          "content": "{{step_2}}"
+                        },
+                        {
+                          "role": "user",
+                          "content": "Input Text: {{step_1}}"
+                        }
+                      ],
+                      "maxTokens": "16384",
+                      "temperature": "0.7"
+                    },
+                    "pieceName": "@activepieces/piece-zbrain-ai",
+                    "pieceType": "CUSTOM",
+                    "actionName": "models",
+                    "inputUiInfo": {},
+                    "packageType": "ARCHIVE",
+                    "pieceVersion": "0.0.7",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_11",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "apiKey": "{{trigger.body.auth.apiKey}}",
+                        "output": "{{step_10['content']}}",
+                        "tenantId": "{{trigger.body.tenantId}}",
+                        "workerId": "{{trigger.body.workerId}}",
+                        "workerRecordId": "{{trigger.body.workerRecordId}}"
+                      },
+                      "pieceName": "@activepieces/piece-utilities",
+                      "pieceType": "CUSTOM",
+                      "actionName": "agent_output",
+                      "inputUiInfo": {},
+                      "packageType": "ARCHIVE",
+                      "pieceVersion": "0.2.12",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "displayName": "Advanced Agent Dashboard Settings Copy"
+                  },
+                  "displayName": "Models Copy"
+                },
+                "displayName": "Prompt for the Redundancy Detection"
+              },
+              "onSuccessAction": {
+                "name": "step_8",
+                "type": "CODE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "text": "{{step_1}}"
+                  },
+                  "sourceCode": {
+                    "code": "export const code = async (inputs) => {\n   // Ensure the text is provided\n  if (!inputs || !inputs.text) {\n    throw new Error(\"Input text is missing.\");\n  }\n\n  const text = inputs.text; // Extract text from inputs\n\n  // Simple tokenization function based on splitting words\n  const tokenize = (text) => {\n    // We simulate tokenization by splitting text on spaces, punctuation, and newlines\n    return text.split(/\\s+/);  // Split on spaces, newlines, and other white spaces\n  };\n\n  // Function to chunk text into pieces of 4000 tokens with newlines as split points\n  function chunkTextByNewline(tokens, chunkSize = 4000) {\n    const chunks = [];\n    let currentChunk = [];\n    let currentTokenCount = 0;\n\n    // Split the text into lines first\n    const lines = text.split(\"\\n\");\n\n    // Process each line\n    for (let line of lines) {\n      const lineTokens = tokenize(line);  // Tokenize the current line\n      const lineTokenCount = lineTokens.length;\n\n      // If adding this line would exceed the chunk size, start a new chunk\n      if (currentTokenCount + lineTokenCount > chunkSize) {\n        // Push the current chunk as a new chunk\n        chunks.push(currentChunk.join(\"\\n\"));\n        currentChunk = [];  // Reset for the next chunk\n        currentTokenCount = 0; // Reset token count for the new chunk\n      }\n\n      // Add the line to the current chunk\n      currentChunk.push(line);\n      currentTokenCount += lineTokenCount; // Update token count\n    }\n\n    // If there's any remaining chunk, push it\n    if (currentChunk.length > 0) {\n      chunks.push(currentChunk.join(\"\\n\"));\n    }\n\n    return chunks;\n  }\n\n  // Tokenize the text (use this for counting tokens and splitting by newlines)\n  const tokens = tokenize(text);\n\n  // Chunk the tokens into pieces of roughly 4000 tokens, respecting newlines\n  return chunkTextByNewline(tokens);  // Return the array of chunks directly\n}",
+                    "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                  },
+                  "inputUiInfo": {},
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_9",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_8}}",
+                    "inputUiInfo": {}
+                  },
+                  "nextAction": {
+                    "name": "step_13",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "key": "chunks",
+                        "store_scope": "COLLECTION"
+                      },
+                      "pieceName": "@activepieces/piece-store",
+                      "pieceType": "OFFICIAL",
+                      "actionName": "get",
+                      "inputUiInfo": {},
+                      "packageType": "REGISTRY",
+                      "pieceVersion": "0.5.4",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_5",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "apiKey": "{{trigger.body.auth.apiKey}}",
+                          "output": "{{step_13}}",
+                          "tenantId": "{{trigger.body.tenantId}}",
+                          "workerId": "{{trigger.body.workerId}}",
+                          "workerRecordId": "{{trigger.body.workerRecordId}}"
+                        },
+                        "pieceName": "@activepieces/piece-utilities",
+                        "pieceType": "CUSTOM",
+                        "actionName": "agent_output",
+                        "inputUiInfo": {},
+                        "packageType": "ARCHIVE",
+                        "pieceVersion": "0.2.12",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Advanced Agent Dashboard Settings"
+                    },
+                    "displayName": "Get"
+                  },
+                  "displayName": "Loop on Items",
+                  "firstLoopAction": {
+                    "name": "step_15",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "key": "chunks",
+                        "store_scope": "COLLECTION",
+                        "defaultValue": "null"
+                      },
+                      "pieceName": "@activepieces/piece-store",
+                      "pieceType": "OFFICIAL",
+                      "actionName": "get",
+                      "inputUiInfo": {},
+                      "packageType": "REGISTRY",
+                      "pieceVersion": "0.5.4",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_16",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "input": "You are a Redundancy Elimination Agent. Your task is to process text in sequential chunks to ensure it is concise, clear, and unique by identifying and eliminating redundancy or repetitive patterns.\nProcess Guidelines:\nSelf-Contained Redundancy Check:\nReview the current chunk for internal redundancies and eliminate them.\nCross-Chunk Comparison:\nIf previous chunks are provided, compare them with the current chunk to identify and remove overlapping content.\nRetain only the unique content within the current chunk to ensure its distinction across all chunks.\nIndependent Processing:\nIf no previous chunk is provided, process the current chunk independently, focusing only on its internal uniqueness.\nOutput Requirements:\nProvide only the unique content from the current chunk.\nDo not include explanations, summaries, or any content from the previous chunk in the output.\nIncase the current chunk is not at all unique from the previous chunk. Output nothing.\nKey Rules:\nDetect and eliminate repetitive phrases, sentences, or ideas, both internally and in relation to previous chunks.\nEnsure the revised text is concise, clear, and maintains the original meaning.\nAvoid over-compacting the text to preserve readability and natural flow.\nRetain the tone, purpose, and context of the input text."
+                        },
+                        "pieceName": "@activepieces/piece-inputs",
+                        "pieceType": "CUSTOM",
+                        "actionName": "text_input",
+                        "inputUiInfo": {},
+                        "packageType": "ARCHIVE",
+                        "pieceVersion": "0.0.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "name": "step_4",
+                        "type": "PIECE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "auth": "{{connections['zbrain-ai']}}",
+                            "model": "gpt-4o",
+                            "messages": [
+                              {
+                                "role": "system",
+                                "content": "{{step_16}}"
+                              },
+                              {
+                                "role": "user",
+                                "content": "Current chunk - \n{{step_9['item']}} \n\nPrevious chunk - \n{{step_15}}"
+                              }
+                            ],
+                            "maxTokens": "16384",
+                            "temperature": "0.7"
+                          },
+                          "pieceName": "@activepieces/piece-zbrain-ai",
+                          "pieceType": "CUSTOM",
+                          "actionName": "models",
+                          "inputUiInfo": {},
+                          "packageType": "ARCHIVE",
+                          "pieceVersion": "0.0.7",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_12",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "key": "chunks",
+                              "value": "{{step_4['content']}}",
+                              "separator": "\\n",
+                              "store_scope": "COLLECTION"
+                            },
+                            "pieceName": "@activepieces/piece-store",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "append",
+                            "inputUiInfo": {},
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "0.5.4",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "displayName": "Append"
+                        },
+                        "displayName": "Models"
+                      },
+                      "displayName": "Prompt for the Redundancy Detection Copy"
+                    },
+                    "displayName": "Get"
+                  }
+                },
+                "displayName": "Code"
+              }
+            },
+            "displayName": "Tokenizer"
+          },
+          "displayName": "Remove"
+        },
+        "displayName": "Long text"
+      },
+      "type": "WEBHOOK",
+      "settings": {
+        "inputUiInfo": {}
+      }
+    },
+    "valid": true
+  }
+}

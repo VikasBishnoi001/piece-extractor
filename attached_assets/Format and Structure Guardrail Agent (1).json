@@ -1,0 +1,145 @@
+{
+  "created": "1736335421172",
+  "updated": "1736335421172",
+  "name": "Format and Structure Guardrail Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-utilities"
+  ],
+  "blogUrl": "",
+  "template": {
+    "displayName": "Format and Structure Guardrail Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": {
+              "input": "{{trigger['body']}}"
+            }
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "json_input",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_2",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "input": "You are a formatting and structuring assistant designed to validate and enforce the correct output format for XML, JSON, CSV, or Markdown. Your purpose is to ensure that outputs are precise, consistent, and adhere to predefined structures or style guides.  \n\nWhen formatting outputs:  \n1. Validation:  \n   - Check if the output adheres to the specified format (e.g., XML, JSON, CSV, Markdown).  \n   - Flag and correct any syntax errors or structural inconsistencies.  \n\n2. Style Enforcement:  \n   - Enforce alignment with predefined style guides, templates, or structural rules.  \n   - Adjust formatting (e.g., indentation, spacing, or character encoding) to ensure outputs are clean and standardized.  \n\n3. Preservation of Data:  \n   - Retain all data during the reformatting process.  \n   - Ensure data is accurately represented in the specified format.  \n\n4. Error Reporting:  \n   - Provide a summary of errors or deviations found.  \n   - Explain changes made to meet the required format and structure.  \n\n---\n\nAdditional Requirements:\n- Complete Output Guarantee:  \n  Ensure that the output is complete and contains all necessary details without truncation. If the response exceeds the maximum length allowed, prioritize reformatting and concise representation to fit within the response while still including all essential information.  \n\n- Validation First:  \n  Always validate the format first. If validation fails, reformat the content before providing the output.  \n\n- Change Summary:  \n  Include a section describing the changes made for educational or debugging purposes.  \n\n- Data Integrity:  \n  Do not alter the meaning or content of the data unless explicitly instructed.  \n\n- Compatibility Assurance:  \n  Ensure compatibility with downstream systems or end-users.  \n\n- Clarity and Accessibility:  \n  Use clear language, structure, and formatting in responses to ensure readability and utility.  "
+            },
+            "pieceName": "@activepieces/piece-inputs",
+            "pieceType": "CUSTOM",
+            "actionName": "text_input",
+            "inputUiInfo": {},
+            "packageType": "ARCHIVE",
+            "pieceVersion": "0.0.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_4",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['zbrain-ai']}}",
+                "model": "gpt-4o",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "{{step_2}}"
+                  },
+                  {
+                    "role": "user",
+                    "content": "Output content:{{step_1['input']['file']['content']}}"
+                  }
+                ],
+                "maxTokens": "16384",
+                "temperature": "0.7"
+              },
+              "pieceName": "@activepieces/piece-zbrain-ai",
+              "pieceType": "CUSTOM",
+              "actionName": "models",
+              "inputUiInfo": {},
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.0.7",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_5",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "apiKey": "{{trigger.body.auth.apiKey}}",
+                  "output": "{{step_4['content']}}",
+                  "tenantId": "{{trigger.body.tenantId}}",
+                  "workerId": "{{trigger.body.workerId}}",
+                  "workerRecordId": "{{trigger.body.workerRecordId}}"
+                },
+                "pieceName": "@activepieces/piece-utilities",
+                "pieceType": "CUSTOM",
+                "actionName": "agent_output",
+                "inputUiInfo": {},
+                "packageType": "ARCHIVE",
+                "pieceVersion": "0.2.13",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "displayName": "Advanced Agent Dashboard Settings"
+            },
+            "displayName": "Models"
+          },
+          "displayName": "Prompt for Format and Structure Checking"
+        },
+        "displayName": "Input Content"
+      },
+      "type": "WEBHOOK",
+      "settings": {
+        "inputUiInfo": {}
+      }
+    },
+    "valid": true
+  }
+}

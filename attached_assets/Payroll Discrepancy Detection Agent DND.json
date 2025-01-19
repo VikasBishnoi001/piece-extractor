@@ -1,0 +1,1047 @@
+{
+  "created": "1737174662216",
+  "updated": "1737174662216",
+  "name": "Payroll Discrepancy Detection Agent DND",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-store",
+    "@activepieces/piece-http",
+    "@activepieces/piece-google-sheets",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-utilities"
+  ],
+  "template": {
+    "displayName": "Payroll Discrepancy Detection Agent DND",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": {
+              "input": "{{trigger['body']}}"
+            }
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "json_input",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_29",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "output",
+              "store_scope": "COLLECTION"
+            },
+            "pieceName": "@activepieces/piece-store",
+            "pieceType": "OFFICIAL",
+            "actionName": "remove_value",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "REGISTRY",
+            "pieceVersion": "0.5.4",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_17",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "url": "https://app.zbrain.ai:3000/api/knowledge-base/6787a8844f852002284e43f5",
+                "method": "GET",
+                "headers": {
+                  "Authorization": "Bearer za-U2FsdGVkX1/GHBImZ2rply23wCWAvIpgtEEd/zoyEQRiTbQ4Zzp4eObr9A5fgHtM6ZIU442uMhN/uT18YOENXYEARFqDHgcJKc0FAoOvRbA+Fg0bsbvL4OJXC5dE5bCk"
+                },
+                "failsafe": false,
+                "queryParams": {}
+              },
+              "pieceName": "@activepieces/piece-http",
+              "pieceType": "OFFICIAL",
+              "actionName": "send_request",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "pieceVersion": "0.3.10",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_3",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "url": "https://app.zbrain.ai:3000/api/view-extracted-data",
+                  "body": {
+                    "knowledgeBaseImportId": "{{step_17['body']['responseData']['knowledgeBaseImports'][0]['_id']}}"
+                  },
+                  "method": "POST",
+                  "headers": {
+                    "Authorization": "Bearer za-U2FsdGVkX1/GHBImZ2rply23wCWAvIpgtEEd/zoyEQRiTbQ4Zzp4eObr9A5fgHtM6ZIU442uMhN/uT18YOENXYEARFqDHgcJKc0FAoOvRbA+Fg0bsbvL4OJXC5dE5bCk"
+                  },
+                  "failsafe": false,
+                  "queryParams": {}
+                },
+                "pieceName": "@activepieces/piece-http",
+                "pieceType": "OFFICIAL",
+                "actionName": "send_request",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "pieceVersion": "0.3.10",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_16",
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "url": "{{step_3['body']['responseData']['signedUrl']}}",
+                    "method": "GET",
+                    "headers": {},
+                    "failsafe": false,
+                    "queryParams": {}
+                  },
+                  "pieceName": "@activepieces/piece-http",
+                  "pieceType": "OFFICIAL",
+                  "actionName": "send_request",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "pieceVersion": "0.3.10",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_20",
+                  "type": "PIECE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "input": "{{step_16['body'][0]['text']}}"
+                    },
+                    "pieceName": "@activepieces/piece-inputs",
+                    "pieceType": "CUSTOM",
+                    "actionName": "long_text",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "ARCHIVE",
+                    "pieceVersion": "0.0.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_2",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "url": {
+                          "url": "https://sheets.googleapis.com/v4/spreadsheets/1Dw1F7916cynCgs6QgPjMdpVNd_uq2HQ-Peem-ZXsAtA/values/Sheet1!A:A"
+                        },
+                        "auth": "{{connections['google-sheets-pawar']}}",
+                        "method": "GET",
+                        "headers": {},
+                        "failsafe": false,
+                        "queryParams": {}
+                      },
+                      "pieceName": "@activepieces/piece-google-sheets",
+                      "pieceType": "OFFICIAL",
+                      "actionName": "custom_api_call",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "pieceVersion": "0.11.12",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_6",
+                      "type": "CODE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "jsonData": "{{step_2['body']['values']}}"
+                        },
+                        "sourceCode": {
+                          "code": "export const code = async (inputs) => {\n  const result = {};\n\n  // Extract all Employee IDs and assign them to the \"Employee Id\" key\n  result[\"Employee Id\"] = inputs.jsonData.slice(1).map(item => item[0]); // Slice to exclude the header and map to extract the EIDs\n\n  return result;\n};\n",
+                          "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                        },
+                        "inputUiInfo": {},
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "name": "step_26",
+                        "type": "CODE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "jsonData": "{{step_6['Employee Id']}}"
+                          },
+                          "sourceCode": {
+                            "code": "export const code = async (inputs) => {\n  return inputs.jsonData.length;\n};",
+                            "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                          },
+                          "inputUiInfo": {},
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_5",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['google-sheets-pawar']}}",
+                              "sheet_id": 0,
+                              "rowNumber": "1",
+                              "spreadsheet_id": "1Dw1F7916cynCgs6QgPjMdpVNd_uq2HQ-Peem-ZXsAtA",
+                              "include_team_drives": false
+                            },
+                            "pieceName": "@activepieces/piece-google-sheets",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "find_row_by_num",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "0.11.12",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_31",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "auth": "{{connections['google-sheets-pawar']}}",
+                                "sheet_id": 0,
+                                "rowNumber": "1",
+                                "spreadsheet_id": "13VVZCbem23N1w7KedMhJpbzop00P3plAFBIRdSxWiuk",
+                                "include_team_drives": false
+                              },
+                              "pieceName": "@activepieces/piece-google-sheets",
+                              "pieceType": "OFFICIAL",
+                              "actionName": "find_row_by_num",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "pieceVersion": "0.11.12",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_32",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "auth": "{{connections['google-sheets-pawar']}}",
+                                  "sheet_id": 0,
+                                  "rowNumber": "1",
+                                  "spreadsheet_id": "19fLsT_34WPVqHI5ETvtUw3fZlpupcrwn4nN9DtERvmc",
+                                  "include_team_drives": false
+                                },
+                                "pieceName": "@activepieces/piece-google-sheets",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "find_row_by_num",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "0.11.12",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_33",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "auth": "{{connections['google-sheets-pawar']}}",
+                                    "sheet_id": 0,
+                                    "rowNumber": "1",
+                                    "spreadsheet_id": "1Zms_m_MGLud9sgxT0k6IQQsKCgsc582EwlLhLmbbmUs",
+                                    "include_team_drives": false
+                                  },
+                                  "pieceName": "@activepieces/piece-google-sheets",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "find_row_by_num",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "0.11.12",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "name": "step_7",
+                                  "type": "LOOP_ON_ITEMS",
+                                  "valid": true,
+                                  "settings": {
+                                    "items": "{{step_6['Employee Id']}}",
+                                    "inputUiInfo": {}
+                                  },
+                                  "nextAction": {
+                                    "name": "step_22",
+                                    "type": "PIECE",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "key": "output",
+                                        "store_scope": "COLLECTION",
+                                        "defaultValue": "null"
+                                      },
+                                      "pieceName": "@activepieces/piece-store",
+                                      "pieceType": "OFFICIAL",
+                                      "actionName": "get",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "pieceVersion": "0.5.4",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "nextAction": {
+                                      "name": "step_25",
+                                      "type": "PIECE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "input": "Based on the provided payroll analysis, your task is to generate a comprehensive Payroll Audit Report in the following format:  \n\n## Payroll Audit Report  \n\n### Summary  \n1. Total number of payroll records analyzed.  \n2. Number of discrepancies identified. (count all the employee ids for which discrepancies are detected)\n3. Total financial impact of the discrepancies (sum of all differences between expected and actual amounts).  \n\n### Detailed Discrepancy Report  \nFor each discrepancy, provide:  \n- **Employee ID**: (Unique identifier of the employee).  \n- **Discrepancy Category**: (Category such as Overpayment, Underpayment, Missing Data, etc.).  \n- **Expected Amount**: (Amount that should have been paid).  \n- **Actual Amount**: (Amount that was actually paid).  \n- **Difference**: (Numeric difference between Expected and Actual amounts).  \n- **Risk Level**: (Assessment of risk associated with this discrepancy as High, Medium, or Low based on the magnitude or frequency).  \n\n\nAdditional Instructions:\n1. Ensure the report is well-organized and clearly formatted.\n2. Use placeholders for any missing information if not provided.  \n3. Ensure the tone is professional and factual, suitable for audit documentation.\n4. Ensure the currency is dollars.($)\n5. Ensure to include only those details where there are discrepancy. ignore the data where there is no discrepancy."
+                                        },
+                                        "pieceName": "@activepieces/piece-inputs",
+                                        "pieceType": "CUSTOM",
+                                        "actionName": "text_input",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "ARCHIVE",
+                                        "pieceVersion": "0.0.1",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "name": "step_4",
+                                        "type": "PIECE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "auth": "{{connections['zbrain-ai']}}",
+                                            "model": "chatgpt-4o-latest",
+                                            "messages": [
+                                              {
+                                                "role": "system",
+                                                "content": "{{step_25}}"
+                                              },
+                                              {
+                                                "role": "user",
+                                                "content": "Total number of Payroll records analysed - {{step_26}}. \n\nDiscrepancy detected data - \n{{step_22}}"
+                                              }
+                                            ],
+                                            "maxTokens": "16384",
+                                            "temperature": "0.7"
+                                          },
+                                          "pieceName": "@activepieces/piece-zbrain-ai",
+                                          "pieceType": "CUSTOM",
+                                          "actionName": "models",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "ARCHIVE",
+                                          "pieceVersion": "0.0.7",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "name": "step_27",
+                                          "type": "PIECE",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "input": "{{step_4['content']}}"
+                                            },
+                                            "pieceName": "@activepieces/piece-inputs",
+                                            "pieceType": "CUSTOM",
+                                            "actionName": "text_input",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "ARCHIVE",
+                                            "pieceVersion": "0.0.1",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "name": "step_28",
+                                            "type": "PIECE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "key": "output",
+                                                "store_scope": "COLLECTION"
+                                              },
+                                              "pieceName": "@activepieces/piece-store",
+                                              "pieceType": "OFFICIAL",
+                                              "actionName": "remove_value",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "packageType": "REGISTRY",
+                                              "pieceVersion": "0.5.4",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "nextAction": {
+                                              "name": "step_30",
+                                              "type": "PIECE",
+                                              "valid": true,
+                                              "settings": {
+                                                "input": {
+                                                  "apiKey": "{{trigger.body.auth.apiKey}}",
+                                                  "output": "{{step_4['content']}}",
+                                                  "tenantId": "{{trigger.body.tenantId}}",
+                                                  "workerId": "{{trigger.body.workerId}}",
+                                                  "workerRecordId": "{{trigger.body.workerRecordId}}"
+                                                },
+                                                "pieceName": "@activepieces/piece-utilities",
+                                                "pieceType": "CUSTOM",
+                                                "actionName": "agent_output",
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {}
+                                                },
+                                                "packageType": "ARCHIVE",
+                                                "pieceVersion": "0.2.13",
+                                                "errorHandlingOptions": {
+                                                  "retryOnFailure": {
+                                                    "value": false
+                                                  },
+                                                  "continueOnFailure": {
+                                                    "value": false
+                                                  }
+                                                }
+                                              },
+                                              "displayName": "Agent Output"
+                                            },
+                                            "displayName": "Remove"
+                                          },
+                                          "displayName": "Text"
+                                        },
+                                        "displayName": "Models"
+                                      },
+                                      "displayName": "Prompt"
+                                    },
+                                    "displayName": "Get - Detected Discrepancy"
+                                  },
+                                  "displayName": "Loop on Items",
+                                  "firstLoopAction": {
+                                    "name": "step_8",
+                                    "type": "PIECE",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "auth": "{{connections['google-sheets-pawar']}}",
+                                        "sheet_id": 0,
+                                        "matchCase": true,
+                                        "columnName": "A",
+                                        "searchValue": "{{step_7['item']}}",
+                                        "numberOfRows": "1",
+                                        "spreadsheet_id": "1Dw1F7916cynCgs6QgPjMdpVNd_uq2HQ-Peem-ZXsAtA",
+                                        "include_team_drives": false
+                                      },
+                                      "pieceName": "@activepieces/piece-google-sheets",
+                                      "pieceType": "OFFICIAL",
+                                      "actionName": "find_rows",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "pieceVersion": "0.11.12",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "nextAction": {
+                                      "name": "step_9",
+                                      "type": "CODE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "headers": "{{step_5['values']}}",
+                                          "jsonData": "{{step_8[0]['values']}}"
+                                        },
+                                        "sourceCode": {
+                                          "code": "export const code = async (inputs) => {\n    const data  = inputs.jsonData;\n    const headers  = inputs.headers;\n\n\n  const newObject = Object.keys(headers).reduce((acc, key) => {\n  acc[headers[key]] = data[key];\n  return acc;\n}, {});\n\n  \n  return newObject;\n};\n",
+                                          "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                        },
+                                        "inputUiInfo": {},
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "name": "step_10",
+                                        "type": "PIECE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "auth": "{{connections['google-sheets-pawar']}}",
+                                            "sheet_id": 0,
+                                            "matchCase": true,
+                                            "columnName": "A",
+                                            "searchValue": "{{step_7['item']}}",
+                                            "numberOfRows": "1",
+                                            "spreadsheet_id": "13VVZCbem23N1w7KedMhJpbzop00P3plAFBIRdSxWiuk",
+                                            "include_team_drives": false
+                                          },
+                                          "pieceName": "@activepieces/piece-google-sheets",
+                                          "pieceType": "OFFICIAL",
+                                          "actionName": "find_rows",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "REGISTRY",
+                                          "pieceVersion": "0.11.12",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "name": "step_11",
+                                          "type": "CODE",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "headers": "{{step_31['values']}}",
+                                              "jsonData": "{{step_10[0]['values']}}"
+                                            },
+                                            "sourceCode": {
+                                              "code": "export const code = async (inputs) => {\n    const data  = inputs.jsonData;\n    const headers  = inputs.headers;\n\n\n  const newObject = Object.keys(headers).reduce((acc, key) => {\n  acc[headers[key]] = data[key];\n  return acc;\n}, {});\n\n  \n  return newObject;\n};\n",
+                                              "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                            },
+                                            "inputUiInfo": {},
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "name": "step_12",
+                                            "type": "PIECE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "auth": "{{connections['google-sheets-pawar']}}",
+                                                "sheet_id": 0,
+                                                "matchCase": true,
+                                                "columnName": "A",
+                                                "searchValue": "{{step_7['item']}}",
+                                                "numberOfRows": "1",
+                                                "spreadsheet_id": "19fLsT_34WPVqHI5ETvtUw3fZlpupcrwn4nN9DtERvmc",
+                                                "include_team_drives": false
+                                              },
+                                              "pieceName": "@activepieces/piece-google-sheets",
+                                              "pieceType": "OFFICIAL",
+                                              "actionName": "find_rows",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "packageType": "REGISTRY",
+                                              "pieceVersion": "0.11.12",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "nextAction": {
+                                              "name": "step_13",
+                                              "type": "CODE",
+                                              "valid": true,
+                                              "settings": {
+                                                "input": {
+                                                  "headers": "{{step_32['values']}}",
+                                                  "jsonData": "{{step_12[0]['values']}}"
+                                                },
+                                                "sourceCode": {
+                                                  "code": "export const code = async (inputs) => {\n    const data  = inputs.jsonData;\n    const headers  = inputs.headers;\n\n\n  const newObject = Object.keys(headers).reduce((acc, key) => {\n  acc[headers[key]] = data[key];\n  return acc;\n}, {});\n\n  \n  return newObject;\n};\n",
+                                                  "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                                },
+                                                "inputUiInfo": {},
+                                                "errorHandlingOptions": {
+                                                  "retryOnFailure": {
+                                                    "value": false
+                                                  },
+                                                  "continueOnFailure": {
+                                                    "value": false
+                                                  }
+                                                }
+                                              },
+                                              "nextAction": {
+                                                "name": "step_14",
+                                                "type": "PIECE",
+                                                "valid": true,
+                                                "settings": {
+                                                  "input": {
+                                                    "auth": "{{connections['google-sheets-pawar']}}",
+                                                    "sheet_id": 0,
+                                                    "matchCase": true,
+                                                    "columnName": "A",
+                                                    "searchValue": "{{step_7['item']}}",
+                                                    "numberOfRows": "1",
+                                                    "spreadsheet_id": "1Zms_m_MGLud9sgxT0k6IQQsKCgsc582EwlLhLmbbmUs",
+                                                    "include_team_drives": false
+                                                  },
+                                                  "pieceName": "@activepieces/piece-google-sheets",
+                                                  "pieceType": "OFFICIAL",
+                                                  "actionName": "find_rows",
+                                                  "inputUiInfo": {
+                                                    "customizedInputs": {}
+                                                  },
+                                                  "packageType": "REGISTRY",
+                                                  "pieceVersion": "0.11.12",
+                                                  "errorHandlingOptions": {
+                                                    "retryOnFailure": {
+                                                      "value": false
+                                                    },
+                                                    "continueOnFailure": {
+                                                      "value": false
+                                                    }
+                                                  }
+                                                },
+                                                "nextAction": {
+                                                  "name": "step_15",
+                                                  "type": "CODE",
+                                                  "valid": true,
+                                                  "settings": {
+                                                    "input": {
+                                                      "headers": "{{step_33['values']}}",
+                                                      "jsonData": "{{step_14[0]['values']}}"
+                                                    },
+                                                    "sourceCode": {
+                                                      "code": "export const code = async (inputs) => {\n    const data  = inputs.jsonData;\n    const headers  = inputs.headers;\n\n\n  const newObject = Object.keys(headers).reduce((acc, key) => {\n  acc[headers[key]] = data[key];\n  return acc;\n}, {});\n\n  \n  return newObject;\n};\n",
+                                                      "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                                    },
+                                                    "inputUiInfo": {},
+                                                    "errorHandlingOptions": {
+                                                      "retryOnFailure": {
+                                                        "value": false
+                                                      },
+                                                      "continueOnFailure": {
+                                                        "value": false
+                                                      }
+                                                    }
+                                                  },
+                                                  "nextAction": {
+                                                    "name": "step_19",
+                                                    "type": "PIECE",
+                                                    "valid": true,
+                                                    "settings": {
+                                                      "input": {
+                                                        "input": "You are an intelligent payroll discrepancy detection agent. Your task is to analyze payroll information for an employee based on the provided rules and regulations, and cross-check it with data from various sources such as timesheet data, tax and deduction records, and employee information.\n\n# Input Details:\n1.) Payroll Information:\nContains the details of the employee’s payroll for the specified period.\n2.) Rules and Regulations:\nGuidelines and criteria you must follow to verify the payroll information. Ensure all components of the payroll are validated based on these rules.\n3.) Supporting Data Sources:\n   Relevant data to validate the payroll information:\n   - Timesheet data for attendance and overtime validation.\n   - Tax and deduction records for verifying deductions.\n   - Employee information for validating the employee's identity, designation, and salary details.\n\n# Output Requirements:\n- Determine whether there are any discrepancies in the payroll information.\n- If discrepancies are found, list them clearly in the output.\n- Use the following JSON format for your response:\n\n{\n  \"discrepancyDetected\": \"<Yes/No>\",\n  \"explanation\": \"<If discrepancies are found, provide a detailed explanation of the discrepancies. If no discrepancies are found, use 'NA' for the explanation.>\"\n}\n\nIf all data is accurate and calculations match based on the rules and supporting data, the discrepancyDetected field must be No and the explanation must state NA.\n\nEnsure that the output json is valid.\nStrictly do not give ```json in the response."
+                                                      },
+                                                      "pieceName": "@activepieces/piece-inputs",
+                                                      "pieceType": "CUSTOM",
+                                                      "actionName": "text_input",
+                                                      "inputUiInfo": {
+                                                        "customizedInputs": {}
+                                                      },
+                                                      "packageType": "ARCHIVE",
+                                                      "pieceVersion": "0.0.1",
+                                                      "errorHandlingOptions": {
+                                                        "retryOnFailure": {
+                                                          "value": false
+                                                        },
+                                                        "continueOnFailure": {
+                                                          "value": false
+                                                        }
+                                                      }
+                                                    },
+                                                    "nextAction": {
+                                                      "name": "step_18",
+                                                      "type": "PIECE",
+                                                      "valid": true,
+                                                      "settings": {
+                                                        "input": {
+                                                          "auth": "{{connections['zbrain-ai']}}",
+                                                          "model": "chatgpt-4o-latest",
+                                                          "messages": [
+                                                            {
+                                                              "role": "system",
+                                                              "content": "{{step_19}}"
+                                                            },
+                                                            {
+                                                              "role": "user",
+                                                              "content": "Payroll information - \n{{step_9}} \n\nEmployee info - \n{{step_11}} \n\nTime Sheet data - \n{{step_13}} \n\nTax and deductions - {{step_15}} \n\nRules and Regulation - \n{{step_20}}"
+                                                            }
+                                                          ],
+                                                          "maxTokens": "16384",
+                                                          "temperature": "0.7"
+                                                        },
+                                                        "pieceName": "@activepieces/piece-zbrain-ai",
+                                                        "pieceType": "CUSTOM",
+                                                        "actionName": "models",
+                                                        "inputUiInfo": {
+                                                          "customizedInputs": {}
+                                                        },
+                                                        "packageType": "ARCHIVE",
+                                                        "pieceVersion": "0.0.7",
+                                                        "errorHandlingOptions": {
+                                                          "retryOnFailure": {
+                                                            "value": false
+                                                          },
+                                                          "continueOnFailure": {
+                                                            "value": false
+                                                          }
+                                                        }
+                                                      },
+                                                      "nextAction": {
+                                                        "name": "step_34",
+                                                        "type": "PIECE",
+                                                        "valid": true,
+                                                        "settings": {
+                                                          "input": {
+                                                            "auth": "{{connections['zbrain-ai']}}",
+                                                            "model": "gpt-4o",
+                                                            "messages": [
+                                                              {
+                                                                "role": "system",
+                                                                "content": "You are provided with a JSON object, and your task is to validate whether the JSON is correctly formatted. If the JSON is invalid, you must identify and correct any issues to make it valid. Output only the corrected JSON without any additional text, explanations, or enclosing formatting tags such as ```json."
+                                                              },
+                                                              {
+                                                                "role": "user",
+                                                                "content": "Json - {{step_18['content']}}"
+                                                              }
+                                                            ],
+                                                            "maxTokens": "16384",
+                                                            "temperature": "0.7"
+                                                          },
+                                                          "pieceName": "@activepieces/piece-zbrain-ai",
+                                                          "pieceType": "CUSTOM",
+                                                          "actionName": "models",
+                                                          "inputUiInfo": {
+                                                            "customizedInputs": {}
+                                                          },
+                                                          "packageType": "ARCHIVE",
+                                                          "pieceVersion": "0.0.7",
+                                                          "errorHandlingOptions": {
+                                                            "retryOnFailure": {
+                                                              "value": false
+                                                            },
+                                                            "continueOnFailure": {
+                                                              "value": false
+                                                            }
+                                                          }
+                                                        },
+                                                        "nextAction": {
+                                                          "name": "step_21",
+                                                          "type": "CODE",
+                                                          "valid": true,
+                                                          "settings": {
+                                                            "input": {
+                                                              "jsonData": "{{step_34['content']}}"
+                                                            },
+                                                            "sourceCode": {
+                                                              "code": "export const code = async (inputs) => {\n  return (JSON.parse(inputs.jsonData));\n};",
+                                                              "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                                            },
+                                                            "inputUiInfo": {},
+                                                            "errorHandlingOptions": {
+                                                              "retryOnFailure": {
+                                                                "value": false
+                                                              },
+                                                              "continueOnFailure": {
+                                                                "value": false
+                                                              }
+                                                            }
+                                                          },
+                                                          "nextAction": {
+                                                            "name": "step_24",
+                                                            "type": "ROUTER",
+                                                            "valid": true,
+                                                            "children": [
+                                                              {
+                                                                "name": "step_23",
+                                                                "type": "PIECE",
+                                                                "valid": true,
+                                                                "settings": {
+                                                                  "input": {
+                                                                    "key": "output",
+                                                                    "value": "Employee Code: {{step_7['item']}}\nEmployee Name: {{step_9['Employee Name']}}\nDiscrepancies:\n{{step_21['explanation']}}",
+                                                                    "separator": "\\n\\n",
+                                                                    "store_scope": "COLLECTION"
+                                                                  },
+                                                                  "pieceName": "@activepieces/piece-store",
+                                                                  "pieceType": "OFFICIAL",
+                                                                  "actionName": "append",
+                                                                  "inputUiInfo": {
+                                                                    "customizedInputs": {}
+                                                                  },
+                                                                  "packageType": "REGISTRY",
+                                                                  "pieceVersion": "0.5.4",
+                                                                  "errorHandlingOptions": {
+                                                                    "retryOnFailure": {
+                                                                      "value": false
+                                                                    },
+                                                                    "continueOnFailure": {
+                                                                      "value": false
+                                                                    }
+                                                                  }
+                                                                },
+                                                                "displayName": "Append - detected Discrepancy"
+                                                              },
+                                                              null
+                                                            ],
+                                                            "settings": {
+                                                              "branches": [
+                                                                {
+                                                                  "branchName": "On Success",
+                                                                  "branchType": "CONDITION",
+                                                                  "conditions": [
+                                                                    [
+                                                                      {
+                                                                        "operator": "TEXT_EXACTLY_MATCHES",
+                                                                        "firstValue": "{{step_21['discrepancyDetected']}}",
+                                                                        "secondValue": "Yes",
+                                                                        "caseSensitive": false
+                                                                      }
+                                                                    ]
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "branchName": "Otherwise",
+                                                                  "branchType": "FALLBACK"
+                                                                }
+                                                              ],
+                                                              "inputUiInfo": {},
+                                                              "executionType": "EXECUTE_FIRST_MATCH"
+                                                            },
+                                                            "displayName": "Branch - true if discrepancy detected"
+                                                          },
+                                                          "displayName": "Code - String to JSON (discrepancy detection)"
+                                                        },
+                                                        "displayName": "Models to check json"
+                                                      },
+                                                      "displayName": "Models to detect discrepancy"
+                                                    },
+                                                    "displayName": "Prompt - to detect discrepancy"
+                                                  },
+                                                  "displayName": "Tax info"
+                                                },
+                                                "displayName": "Find Rows - Tax management"
+                                              },
+                                              "displayName": "Time sheet info"
+                                            },
+                                            "displayName": "Find Rows - Time Sheet"
+                                          },
+                                          "displayName": "Core employee info"
+                                        },
+                                        "displayName": "Find Rows - Core employee info"
+                                      },
+                                      "displayName": "data from master sheet"
+                                    },
+                                    "displayName": "Find Rows - Master sheet"
+                                  }
+                                },
+                                "displayName": "Get headers - Tax Management"
+                              },
+                              "displayName": "Get headers - Time sheet"
+                            },
+                            "displayName": "Get headers - Core Employee Info"
+                          },
+                          "displayName": "Get headers - Master Sheet"
+                        },
+                        "displayName": "Number of payroll records"
+                      },
+                      "displayName": "Code - for all Employee Ids"
+                    },
+                    "displayName": "Get all employee ids"
+                  },
+                  "displayName": "Rules from KB"
+                },
+                "displayName": "Get Content"
+              },
+              "displayName": "Get Signed URL"
+            },
+            "displayName": "Get KB"
+          },
+          "displayName": "Remove"
+        },
+        "displayName": "Inputs"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

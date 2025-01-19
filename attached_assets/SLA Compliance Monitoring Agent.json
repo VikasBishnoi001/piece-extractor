@@ -1,0 +1,295 @@
+{
+  "created": "1737174703580",
+  "updated": "1737174703580",
+  "name": "SLA Compliance Monitoring Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-http",
+    "@activepieces/piece-google-sheets",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-utilities"
+  ],
+  "template": {
+    "displayName": "SLA Compliance Monitoring Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": {
+              "input": "{{trigger['body']}}"
+            }
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "json_input",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_6",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "url": "https://app.zbrain.ai:3000/api/knowledge-base/677bbf3963ea62022752b55a",
+              "method": "GET",
+              "headers": {
+                "Authorization": "za-U2FsdGVkX1/GHBImZ2rply23wCWAvIpgtEEd/zoyEQRiTbQ4Zzp4eObr9A5fgHtM6ZIU442uMhN/uT18YOENXYEARFqDHgcJKc0FAoOvRbA+Fg0bsbvL4OJXC5dE5bCk"
+              },
+              "failsafe": false,
+              "queryParams": {}
+            },
+            "pieceName": "@activepieces/piece-http",
+            "pieceType": "OFFICIAL",
+            "actionName": "send_request",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "REGISTRY",
+            "pieceVersion": "0.3.10",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_7",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "url": "https://app.zbrain.ai:3000/api/view-extracted-data",
+                "body": {
+                  "knowledgeBaseImportId": "{{step_6['body']['responseData']['knowledgeBaseImports'][0]['_id']}}"
+                },
+                "method": "POST",
+                "headers": {
+                  "Authorization": "za-U2FsdGVkX1/GHBImZ2rply23wCWAvIpgtEEd/zoyEQRiTbQ4Zzp4eObr9A5fgHtM6ZIU442uMhN/uT18YOENXYEARFqDHgcJKc0FAoOvRbA+Fg0bsbvL4OJXC5dE5bCk"
+                },
+                "failsafe": false,
+                "queryParams": {}
+              },
+              "pieceName": "@activepieces/piece-http",
+              "pieceType": "OFFICIAL",
+              "actionName": "send_request",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "pieceVersion": "0.3.10",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_8",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "url": "{{step_7['body']['responseData']['signedUrl']}}",
+                  "method": "GET",
+                  "headers": {},
+                  "failsafe": false,
+                  "queryParams": {}
+                },
+                "pieceName": "@activepieces/piece-http",
+                "pieceType": "OFFICIAL",
+                "actionName": "send_request",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "pieceVersion": "0.3.10",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_2",
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "url": {
+                      "url": "https://sheets.googleapis.com/v4/spreadsheets/1esdgJ_9B14JOvR_HjJ2Es3R_fO4FUJYCXCFKkyhw2Bs/values/Sheet3"
+                    },
+                    "auth": "{{connections['google-sheets-Sparsh']}}",
+                    "method": "GET",
+                    "headers": {},
+                    "failsafe": false,
+                    "queryParams": {}
+                  },
+                  "pieceName": "@activepieces/piece-google-sheets",
+                  "pieceType": "OFFICIAL",
+                  "actionName": "custom_api_call",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "pieceVersion": "0.11.12",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_9",
+                  "type": "PIECE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['zbrain-ai']}}",
+                      "model": "gpt-4o",
+                      "messages": [
+                        {
+                          "role": "system",
+                          "content": "You are a helpful assistant your task is to analyze the provided SLA (Service Level Agreement) document and the metrics data from a Google Sheet. Your role involves the following key steps:Document Review: Go through the SLA document thoroughly to understand the specific requirements and standards that are set for service performance metrics such as uptime, response time, and resolution time Data Analysis: Examine the metrics data provided from the Google Sheet, which includes actual performance figures recorded over a specified period Compliance Check: Compare the figures from the Google Sheet against the standards set in the SLA document. Identify any discrepancies or violations where the service metrics do not meet the requirements outlined in the SLA Report Generation: Create a detailed summary report based on your analysis. The report should clearly indicate whether the service is in compliance with the SLA or if there are any violations. Each metric should be reported with both the expected standard (from the SLA) and the actual figure (from the Google Sheet) Client Details: Include the client details in the summary report. This should cover basic information such as the client's name, contract period, and any relevant specifics that would contextualize the compliance check Final Assessment: Conclude the report with a final assessment stating whether the service is in compliance with the SLA or not. If there are violations, detail them specifically, including which aspects of the service did not meet the SLA standards Your output should be professional, clear, and concise, providing all necessary details to stakeholders to make informed decisions based on the SLA compliance status."
+                        },
+                        {
+                          "role": "user",
+                          "content": "{{step_8['body'][0]['text']}},{{step_2['body']['values']}} "
+                        }
+                      ],
+                      "maxTokens": "2048",
+                      "temperature": "0.5"
+                    },
+                    "pieceName": "@activepieces/piece-zbrain-ai",
+                    "pieceType": "CUSTOM",
+                    "actionName": "models",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "ARCHIVE",
+                    "pieceVersion": "0.0.7",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_11",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "input": "{{step_9['content']}}"
+                      },
+                      "pieceName": "@activepieces/piece-inputs",
+                      "pieceType": "CUSTOM",
+                      "actionName": "long_text",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "ARCHIVE",
+                      "pieceVersion": "0.0.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_5",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "apiKey": "{{trigger.body.auth.apiKey}}",
+                          "output": "{{step_9['content']}}",
+                          "tenantId": "{{trigger.body.tenantId}}",
+                          "workerId": "{{trigger.body.workerId}}",
+                          "workerRecordId": "{{trigger.body.workerRecordId}}"
+                        },
+                        "pieceName": "@activepieces/piece-utilities",
+                        "pieceType": "CUSTOM",
+                        "actionName": "agent_output",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "ARCHIVE",
+                        "pieceVersion": "0.2.12",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Advanced Agent Dashboard Settings"
+                    },
+                    "displayName": "Long text"
+                  },
+                  "displayName": "Models"
+                },
+                "displayName": "Custom API Call"
+              },
+              "displayName": "Send HTTP request"
+            },
+            "displayName": "Send HTTP request"
+          },
+          "displayName": "Send HTTP request"
+        },
+        "displayName": "Inputs"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

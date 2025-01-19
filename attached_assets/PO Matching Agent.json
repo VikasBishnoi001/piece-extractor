@@ -1,0 +1,845 @@
+{
+  "created": "1737174688556",
+  "updated": "1737174688556",
+  "name": "PO Matching Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-jira-cloud",
+    "@activepieces/piece-utilities"
+  ],
+  "template": {
+    "displayName": "PO Matching Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": {
+              "input": "{{trigger['body']}}"
+            }
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "json_input",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_2",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "input": {
+                "body": {
+                  "auth": {
+                    "apiKey": "<api-key>"
+                  },
+                  "file": {
+                    "url": "https://s3.us-east-1.amazonaws.com/zbrain.tenants.us.dev/worker-records/6628c196301afe0024fbf181/677faa8ebd601800249fa394/invoice.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIATYCJ7W27RM5HKRYZ%2F20250110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250110T181715Z&X-Amz-Expires=86400&X-Amz-Signature=00479b119190bb79c88f42045a9af9a444acce8292abcb8682525ad91fb62015&X-Amz-SignedHeaders=host&x-id=GetObject",
+                    "content": "\n\n**From Address**\n\nName: \nAddress: example@domain.com\n\n**Subject**\n\nInvoice for PO-2024-0893\n\n**Messages**\n\nDear Udesh Sharma,\n\nPlease find your invoice details below:\n\n**Invoice Details:**\n- Invoice Number: INV-2024-0001\n- Customer Name: Udesh Sharma\n- Shipping Address: 123 Innovation Drive, Silicon Valley, CA 94025, USA\n- Billing Address: 124 Innovation Drive, Silicon Valley, CA 94025, USA\n- Total Amount: $3,250.00\n\n**Order Details:**\n- Order Number: PO-2024-0893\n\n**Products:**\n1. Widget A\n   - Quantity: 50\n   - Unit Price: $25.00\n   - Total Price: $1,250.00\n2. Widget B\n   - Quantity: 20\n   - Unit Price: $50.00\n   - Total Price: $1,000.00\n3. Widget C\n   - Quantity: 10\n   - Unit Price: $100.00\n   - Total Price: $1,000.00\n\n**Grand Total:** $3,250.00\n\nPlease let us know if you have any questions or concerns regarding your invoice.\n\nBest regards,\nTech Innovators Ltd."
+                  },
+                  "inputs": [
+                    {
+                      "name": "From Address",
+                      "type": "text",
+                      "content": "Name: \nAddress: example@domain.com"
+                    },
+                    {
+                      "name": "Subject",
+                      "type": "text",
+                      "content": "Invoice for PO-2024-0893"
+                    },
+                    {
+                      "name": "Messages",
+                      "type": "text",
+                      "content": "Dear Udesh Sharma,\n\nPlease find your invoice details below:\n\n**Invoice Details:**\n- Invoice Number: INV-2024-0001\n- Customer Name: Udesh Sharma\n- Shipping Address: 123 Innovation Drive, Silicon Valley, CA 94025, USA\n- Billing Address: 124 Innovation Drive, Silicon Valley, CA 94025, USA\n- Total Amount: $3,250.00\n\n**Order Details:**\n- Order Number: PO-2024-0893\n\n**Products:**\n1. Widget A\n   - Quantity: 50\n   - Unit Price: $25.00\n   - Total Price: $1,250.00\n2. Widget B\n   - Quantity: 20\n   - Unit Price: $50.00\n   - Total Price: $1,000.00\n3. Widget C\n   - Quantity: 10\n   - Unit Price: $100.00\n   - Total Price: $1,000.00\n\n**Grand Total:** $3,250.00\n\nPlease let us know if you have any questions or concerns regarding your invoice.\n\nBest regards,\nTech Innovators Ltd."
+                    }
+                  ],
+                  "metadata": {
+                    "thread": {
+                      "id": "19450bc8fd811ff6",
+                      "historyId": "356177"
+                    },
+                    "message": {
+                      "id": "<CACbgnkfbMZFExjUh2HgLyYDD5_z4vDMXzp=q5iWs+5iSBZokZw@mail.gmail.com>"
+                    }
+                  },
+                  "outbound": [],
+                  "tenantId": "6628c196301afe0024fbf181",
+                  "workerId": "677faa8ebd601800249fa394",
+                  "workerRecordId": "6781642bbd60180024a32697"
+                },
+                "method": "POST",
+                "headers": {},
+                "queryParams": {}
+              }
+            },
+            "pieceName": "@activepieces/piece-inputs",
+            "pieceType": "CUSTOM",
+            "actionName": "json_input",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "ARCHIVE",
+            "pieceVersion": "0.0.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_7",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "input": "Please analyze the provided data and extract the following details, and return the output in JSON format with the corresponding fields:\nFrom Address: Extract the sender's email address.\nSubject: Extract the subject of the email.\nMessages: Extract the main body of the email message.\nAttachment: If there are any files or media attached, list them.\nOrder Details: If available, extract the following information:\nOrder Number\nProducts (Name, Quantity, Unit Price, Total Price)\nTotal Order Amount\nInvoice Details: If available, extract the following information:\nInvoice Number\nCustomer Name\nShipping Address\nBilling Address\nTotal Invoice Amount\nThe extracted information should be returned in JSON format as follows:\n\n{\n  \"subject\": \"<subject>\",\n  \"emailBody\": \"<email body>\",\n  \"orderDetails\": {\n    \"orderNumber\": \"<order number>\",\n    \"products\": [\n      {\n        \"productName\": \"<product name>\",\n        \"quantity\": <quantity>,\n        \"unitPrice\": <unit price>,\n        \"totalPrice\": <total price>\n      }\n    ],\n    \"totalAmount\": <total order amount>\n  },\n  \"invoiceDetails\": {\n    \"invoiceNumber\": \"<invoice number>\",\n    \"customerName\": \"<customer name>\",\n    \"shippingAddress\": \"<shipping address>\",\n    \"billingAddress\": \"<billing address>\",\n    \"totalAmount\": <total invoice amount>\n  },\n  \"attachment\": \"<attachment details>\"\n}\nNote: Strictly don't return a response in ```json"
+              },
+              "pieceName": "@activepieces/piece-inputs",
+              "pieceType": "CUSTOM",
+              "actionName": "text_input",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_3",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "auth": "{{connections['zbrain-ai']}}",
+                  "model": "gpt-4o",
+                  "messages": [
+                    {
+                      "role": "system",
+                      "content": "{{step_7}}"
+                    },
+                    {
+                      "role": "user",
+                      "content": "subject:{{step_2['body']['inputs'][1]['content']}},{{step_2['body']['inputs'][2]['content']}}"
+                    }
+                  ],
+                  "maxTokens": "2048",
+                  "temperature": "0.5"
+                },
+                "pieceName": "@activepieces/piece-zbrain-ai",
+                "pieceType": "CUSTOM",
+                "actionName": "models",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "ARCHIVE",
+                "pieceVersion": "0.0.7",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_6",
+                "type": "CODE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "content": "{{step_3['content']}}"
+                  },
+                  "sourceCode": {
+                    "code": "export const code = async (inputs) => {\n  const emailData = extractEmailDataDynamic(inputs);\n  return emailData;\n};\n\ntype EmailData = {\n  fromAddress?: string;\n  subject?: string;\n  messageBody?: string;\n  attachments?: string[];\n  invoiceNumber?: string;\n  invoiceDetails?: Record<string, any>;\n  orderDetails?: Record<string, any>;\n};\n\nfunction extractEmailDataDynamic(request: any): EmailData {\n  const emailData: EmailData = {\n    fromAddress: undefined,\n    subject: undefined,\n    messageBody: undefined,\n    attachments: [],\n    invoiceNumber: undefined,\n    invoiceDetails: undefined,\n    orderDetails: undefined,\n  };\n\n  // Parse content directly if provided\n  let content = null;\n\n  if (request?.content) {\n    try {\n      content = JSON.parse(request.content); // Parse the stringified JSON\n    } catch (error) {\n      throw new Error(\"Invalid JSON in 'content' field.\");\n    }\n  } else {\n    throw new Error(\"Invalid request format: Missing 'content' field.\");\n  }\n\n  // Extract main email fields\n  emailData.subject = content.subject || undefined;\n  emailData.messageBody = content.emailBody || undefined;\n\n  // Extract attachments\n  if (content.attachment) {\n    emailData.attachments = Array.isArray(content.attachment)\n      ? content.attachment\n      : [content.attachment];\n  }\n\n  // Extract invoice number\n  if (content.invoiceDetails && content.invoiceDetails.invoiceNumber) {\n    emailData.invoiceNumber = content.invoiceDetails.invoiceNumber;\n  }\n\n  // Extract invoice details\n  if (content.invoiceDetails) {\n    emailData.invoiceDetails = content.invoiceDetails;\n  }\n\n  // Extract order details\n  if (content.orderDetails) {\n    emailData.orderDetails = content.orderDetails;\n  }\n\n  return emailData;\n}\n",
+                    "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                  },
+                  "inputUiInfo": {},
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_4",
+                  "type": "PIECE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{trigger.body.auth.apiKey}}",
+                      "model": "gpt-4o",
+                      "messages": [
+                        {
+                          "role": "system",
+                          "content": "You are a helpful assistant."
+                        },
+                        {
+                          "role": "user",
+                          "content": "Explain the content of the file provided: {{trigger.body.file.content}}"
+                        }
+                      ],
+                      "maxTokens": "2048",
+                      "temperature": "0.5"
+                    },
+                    "pieceName": "@activepieces/piece-zbrain-ai",
+                    "pieceType": "CUSTOM",
+                    "actionName": "models",
+                    "inputUiInfo": {},
+                    "packageType": "ARCHIVE",
+                    "pieceVersion": "0.0.7",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_8",
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "url": {
+                          "url": "https://leewayhertz.atlassian.net/rest/api/3/search"
+                        },
+                        "auth": "{{connections['jira-deepak']}}",
+                        "body": {
+                          "jql": "project = 'OM' AND summary ~ '{{step_6['orderDetails']['orderNumber']}}' ORDER BY created DESC",
+                          "fields": [
+                            "summary",
+                            "customfield_12784",
+                            "customfield_12785",
+                            "customfield_12786",
+                            "customfield_12787",
+                            "customfield_12788",
+                            "customfield_12789",
+                            "customfield_12790",
+                            "customfield_12791",
+                            "description"
+                          ],
+                          "startAt": 0,
+                          "maxResults": 1
+                        },
+                        "method": "POST",
+                        "headers": {},
+                        "failsafe": false,
+                        "queryParams": {
+                          "maxResults": "1"
+                        }
+                      },
+                      "pieceName": "@activepieces/piece-jira-cloud",
+                      "pieceType": "OFFICIAL",
+                      "actionName": "custom_api_call",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "pieceVersion": "0.0.11",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_9",
+                      "type": "ROUTER",
+                      "valid": true,
+                      "children": [
+                        {
+                          "name": "step_20",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "input": "You are an intelligent system that validates invoice details against purchase order (PO) details to ensure consistency. Your goal is to verify if the details match after accounting for any differences in units of measure (UOM) and unit price conversions. Identify any discrepancies in quantity, unit price, or total amounts and provide a detailed explanation. If all details match after conversion, confirm the match.\nInput Format:\nInvoice Details (Extracted from the invoice):\nInvoice Number: [Invoice Number]\nPO Number: [PO Number]\nCustomer Name: [Customer Name]\nProduct Details:\nProduct Name: [Name]\nQuantity: [Quantity]\nUnit Price: [Price]\nTotal Price: [Total]\nUnit of Measure: [Unit]\nPurchase Order Details:\nPO Number: [PO Number]\nCustomer Name: [Customer Name]\nProduct Details:\nProduct Name: [Name]\nQuantity: [Quantity]\nUnit Price: [Price]\nTotal Price: [Total]\nUnit of Measure: [Unit]\nConversion Data (for UOM and Unit Price):\nConversion Factors:\n[Unit] to [Unit] = [Factor]\nCurrency Conversion (if applicable): [Currency 1] to [Currency 2] = [Rate]\nOutput Format:\nIf the details match after conversions, confirm with:\n\"Match Found: Invoice details align with the PO after conversions.\"\nIf there are discrepancies, provide:\n\"Discrepancy Found: [Detailed explanation of mismatched fields].\"\nExample:\nInvoice Details:\nInvoice Number: INV-2024-0001\nPO Number: PO-12345\nCustomer Name: John Doe\nProduct Details:\nProduct Name: Widget A, Quantity: 1000 (grams), Unit Price: 0.10 (per gram), Total Price: 100.00\nProduct Name: Widget B, Quantity: 500 (grams), Unit Price: 0.10 (per gram), Total Price: 50.00\nPurchase Order Details:\nPO Number: PO-12345\nCustomer Name: John Doe\nProduct Details:\nProduct Name: Widget A, Quantity: 1 (kilogram), Unit Price: 100.00 (per kilogram), Total Price: 100.00\nProduct Name: Widget B, Quantity: 0.5 (kilogram), Unit Price: 100.00 (per kilogram), Total Price: 50.00\nConversion Data:\nGrams to Kilograms: 1000 grams = 1 kilogram.\nExpected Output:\n\"Match Found: Invoice details align with the PO after conversions.\"\nDiscrepancy Example:\nIf the invoice listed \"Quantity: 1200 grams\" for Widget A, the output would be:\n\"Discrepancy Found: Quantity mismatch for Widget A. Invoice quantity (1200 grams) does not match PO quantity (1000 grams).\nDo not provide calculations done to recieve result only provide result and corrective measures if any"
+                            },
+                            "pieceName": "@activepieces/piece-inputs",
+                            "pieceType": "CUSTOM",
+                            "actionName": "text_input",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "ARCHIVE",
+                            "pieceVersion": "0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_21",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "auth": "{{connections['zbrain-ai']}}",
+                                "model": "gpt-4o",
+                                "messages": [
+                                  {
+                                    "role": "system",
+                                    "content": "{{step_20}}"
+                                  },
+                                  {
+                                    "role": "user",
+                                    "content": "purchase orders:{{step_8['body']['issues'][0]['fields']['description']}}{{step_8['body']['issues'][0]['fields']['summary']}} , invoice details: {{step_6['orderDetails']}}{{step_6['invoiceDetails']}} "
+                                  }
+                                ],
+                                "maxTokens": "2048",
+                                "temperature": "0.5"
+                              },
+                              "pieceName": "@activepieces/piece-zbrain-ai",
+                              "pieceType": "CUSTOM",
+                              "actionName": "models",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "ARCHIVE",
+                              "pieceVersion": "0.0.7",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_5",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "apiKey": "{{trigger.body.auth.apiKey}}",
+                                  "output": "{{step_21['content']}}",
+                                  "tenantId": "{{trigger.body.tenantId}}",
+                                  "workerId": "{{trigger.body.workerId}}",
+                                  "workerRecordId": "{{trigger.body.workerRecordId}}"
+                                },
+                                "pieceName": "@activepieces/piece-utilities",
+                                "pieceType": "CUSTOM",
+                                "actionName": "agent_output",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "ARCHIVE",
+                                "pieceVersion": "0.2.13",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "displayName": "Advanced Agent Dashboard Settings"
+                            },
+                            "displayName": "Models Copy Copy"
+                          },
+                          "displayName": "Prompt to check Invoice consistency Copy"
+                        },
+                        {
+                          "name": "step_11",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['zbrain-ai']}}",
+                              "model": "gpt-4o",
+                              "messages": [
+                                {
+                                  "role": "system",
+                                  "content": "Extract the company name from the following invoice. The company name is typically found at the top of the invoice, often in bold or larger font, and may be labeled as the sender, vendor, or billing company. Return only the company name as the output."
+                                },
+                                {
+                                  "role": "user",
+                                  "content": "invoice details: {{step_6['invoiceDetails']['billingAddress']}}{{step_6['invoiceDetails']['shippingAddress']}}{{step_6['messageBody']}}"
+                                }
+                              ],
+                              "maxTokens": "2048",
+                              "temperature": "0.5"
+                            },
+                            "pieceName": "@activepieces/piece-zbrain-ai",
+                            "pieceType": "CUSTOM",
+                            "actionName": "models",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "ARCHIVE",
+                            "pieceVersion": "0.0.7",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_10",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "url": {
+                                  "url": "https://leewayhertz.atlassian.net/rest/api/3/search"
+                                },
+                                "auth": "{{connections['jira-deepak']}}",
+                                "body": {
+                                  "jql": "project = 'OM' AND summary ~ '{{step_11['content']}}' ORDER BY created DESC",
+                                  "fields": [
+                                    "summary",
+                                    "customfield_12784",
+                                    "customfield_12785",
+                                    "customfield_12786",
+                                    "customfield_12787",
+                                    "customfield_12788",
+                                    "customfield_12789",
+                                    "customfield_12790",
+                                    "customfield_12791",
+                                    "description"
+                                  ],
+                                  "startAt": 0,
+                                  "maxResults": 5
+                                },
+                                "method": "POST",
+                                "headers": {},
+                                "failsafe": false,
+                                "queryParams": {
+                                  "maxResults": "1"
+                                }
+                              },
+                              "pieceName": "@activepieces/piece-jira-cloud",
+                              "pieceType": "OFFICIAL",
+                              "actionName": "custom_api_call",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "pieceVersion": "0.0.11",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_12",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "input": "You are an intelligent system that matches invoice and purchase order (PO) details with records to identify the correct issue ID. Analyze the following invoice and compare it with the provided order details. Return the issue ID where the invoice and PO details match exactly. If no match is found, return 'No Match Found.'\nInput Format:\nInvoice Details (Extracted from the invoice):\nInvoice Number: [Invoice Number]\nPO Number: [PO Number]\nTotal Amount: [Total Amount]\nCustomer Name: [Customer Name]\nProduct Details:\nProduct Name: [Name]\nQuantity: [Quantity]\nUnit Price: [Price]\nTotal Price: [Total]\nOrder Records:\nList of orders in the format:\njson\n\nCopy code\n[\n  {\n    \"issueID\": \"OM-001\",\n    \"poNumber\": \"PO-12345\",\n    \"customerName\": \"John Doe\",\n    \"totalAmount\": 1500.00,\n    \"products\": [\n      { \"name\": \"Widget A\", \"quantity\": 10, \"unitPrice\": 100.00, \"totalPrice\": 1000.00 },\n      { \"name\": \"Widget B\", \"quantity\": 5, \"unitPrice\": 100.00, \"totalPrice\": 500.00 }\n    ]\n  },\n  ...\n]\nOutput Format:\nIf a match is found, return the issueID.\nIf no match is found, return 'No Match Found.'\nExample Invoice:\nInvoice Details:\nInvoice Number: INV-2024-0001\nPO Number: PO-12345\nTotal Amount: 1500.00\nCustomer Name: John Doe\nProduct Details:\nProduct Name: Widget A, Quantity: 10, Unit Price: 100.00, Total Price: 1000.00\nProduct Name: Widget B, Quantity: 5, Unit Price: 100.00, Total Price: 500.00\nOrder Records:\njson\n\nCopy code\n[\n  {\n    \"issueID\": \"OM-001\",\n    \"poNumber\": \"PO-12345\",\n    \"customerName\": \"John Doe\",\n    \"totalAmount\": 1500.00,\n    \"products\": [\n      { \"name\": \"Widget A\", \"quantity\": 10, \"unitPrice\": 100.00, \"totalPrice\": 1000.00 },\n      { \"name\": \"Widget B\", \"quantity\": 5, \"unitPrice\": 100.00, \"totalPrice\": 500.00 }\n    ]\n  },\n  {\n    \"issueID\": \"OM-002\",\n    \"poNumber\": \"PO-67890\",\n    \"customerName\": \"Jane Smith\",\n    \"totalAmount\": 2000.00,\n    \"products\": [\n      { \"name\": \"Widget C\", \"quantity\": 20, \"unitPrice\": 100.00, \"totalPrice\": 2000.00 }\n    ]\n  }\n]\nExpected Output:\n\"OM-001\" (if a match is found)\n\"No Match Found\" (if no match is found)\nNow match the input and return the correct issueID.\"\nThis prompt ensures that the model understands the context and matches invoice details with order records to determine the correct issue ID.\nOnly return the issue id as result no other information required, if no issue that matches is found then return false"
+                                },
+                                "pieceName": "@activepieces/piece-inputs",
+                                "pieceType": "CUSTOM",
+                                "actionName": "text_input",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "ARCHIVE",
+                                "pieceVersion": "0.0.1",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_13",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "auth": "{{connections['zbrain-ai']}}",
+                                    "model": "gpt-4o",
+                                    "messages": [
+                                      {
+                                        "role": "system",
+                                        "content": "{{step_12}}"
+                                      },
+                                      {
+                                        "role": "user",
+                                        "content": "purchase orders{{step_10['body']['issues']}}, invoice details: {{step_6['orderDetails']}}{{step_6['invoiceDetails']}} "
+                                      }
+                                    ],
+                                    "maxTokens": "2048",
+                                    "temperature": "0.5"
+                                  },
+                                  "pieceName": "@activepieces/piece-zbrain-ai",
+                                  "pieceType": "CUSTOM",
+                                  "actionName": "models",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "ARCHIVE",
+                                  "pieceVersion": "0.0.7",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "name": "step_17",
+                                  "type": "ROUTER",
+                                  "valid": true,
+                                  "children": [
+                                    {
+                                      "name": "step_16",
+                                      "type": "PIECE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "url": {
+                                            "url": "https://leewayhertz.atlassian.net/rest/api/3/search"
+                                          },
+                                          "auth": "{{connections['jira-deepak']}}",
+                                          "body": {
+                                            "jql": "project = 'OM' AND 'key'= '{{step_13['content']}}' ORDER BY created DESC",
+                                            "fields": [
+                                              "summary",
+                                              "customfield_12784",
+                                              "customfield_12785",
+                                              "customfield_12786",
+                                              "customfield_12787",
+                                              "customfield_12788",
+                                              "customfield_12789",
+                                              "customfield_12790",
+                                              "customfield_12791",
+                                              "description"
+                                            ],
+                                            "startAt": 0,
+                                            "maxResults": 5
+                                          },
+                                          "method": "POST",
+                                          "headers": {},
+                                          "failsafe": false,
+                                          "queryParams": {
+                                            "maxResults": "1"
+                                          }
+                                        },
+                                        "pieceName": "@activepieces/piece-jira-cloud",
+                                        "pieceType": "OFFICIAL",
+                                        "actionName": "custom_api_call",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "pieceVersion": "0.0.11",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "name": "step_14",
+                                        "type": "PIECE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "input": "You are an intelligent system that validates invoice details against purchase order (PO) details to ensure consistency. Your goal is to verify if the details match after accounting for any differences in units of measure (UOM) and unit price conversions. Identify any discrepancies in quantity, unit price, or total amounts and provide a detailed explanation. If all details match after conversion, confirm the match.\nInput Format:\nInvoice Details (Extracted from the invoice):\nInvoice Number: [Invoice Number]\nPO Number: [PO Number]\nCustomer Name: [Customer Name]\nProduct Details:\nProduct Name: [Name]\nQuantity: [Quantity]\nUnit Price: [Price]\nTotal Price: [Total]\nUnit of Measure: [Unit]\nPurchase Order Details:\nPO Number: [PO Number]\nCustomer Name: [Customer Name]\nProduct Details:\nProduct Name: [Name]\nQuantity: [Quantity]\nUnit Price: [Price]\nTotal Price: [Total]\nUnit of Measure: [Unit]\nConversion Data (for UOM and Unit Price):\nConversion Factors:\n[Unit] to [Unit] = [Factor]\nCurrency Conversion (if applicable): [Currency 1] to [Currency 2] = [Rate]\nOutput Format:\nIf the details match after conversions, confirm with:\n\"Match Found: Invoice details align with the PO after conversions.\"\nIf there are discrepancies, provide:\n\"Discrepancy Found: [Detailed explanation of mismatched fields].\"\nExample:\nInvoice Details:\nInvoice Number: INV-2024-0001\nPO Number: PO-12345\nCustomer Name: John Doe\nProduct Details:\nProduct Name: Widget A, Quantity: 1000 (grams), Unit Price: 0.10 (per gram), Total Price: 100.00\nProduct Name: Widget B, Quantity: 500 (grams), Unit Price: 0.10 (per gram), Total Price: 50.00\nPurchase Order Details:\nPO Number: PO-12345\nCustomer Name: John Doe\nProduct Details:\nProduct Name: Widget A, Quantity: 1 (kilogram), Unit Price: 100.00 (per kilogram), Total Price: 100.00\nProduct Name: Widget B, Quantity: 0.5 (kilogram), Unit Price: 100.00 (per kilogram), Total Price: 50.00\nConversion Data:\nGrams to Kilograms: 1000 grams = 1 kilogram.\nExpected Output:\n\"Match Found: Invoice details align with the PO after conversions.\"\nDiscrepancy Example:\nIf the invoice listed \"Quantity: 1200 grams\" for Widget A, the output would be:\n\"Discrepancy Found: Quantity mismatch for Widget A. Invoice quantity (1200 grams) does not match PO quantity (1000 grams).\nDo not provide calculations done to recieve result only provide result and corrective measures if any"
+                                          },
+                                          "pieceName": "@activepieces/piece-inputs",
+                                          "pieceType": "CUSTOM",
+                                          "actionName": "text_input",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "ARCHIVE",
+                                          "pieceVersion": "0.0.1",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "name": "step_15",
+                                          "type": "PIECE",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "auth": "{{connections['zbrain-ai']}}",
+                                              "model": "gpt-4o",
+                                              "messages": [
+                                                {
+                                                  "role": "system",
+                                                  "content": "{{step_14}}"
+                                                },
+                                                {
+                                                  "role": "user",
+                                                  "content": "purchase orders:{{step_16['body']['issues'][0]['fields']['description']}}{{step_16['body']['issues'][0]['fields']['summary']}} , invoice details: {{step_6['orderDetails']}}{{step_6['invoiceDetails']}} "
+                                                }
+                                              ],
+                                              "maxTokens": "2048",
+                                              "temperature": "0.5"
+                                            },
+                                            "pieceName": "@activepieces/piece-zbrain-ai",
+                                            "pieceType": "CUSTOM",
+                                            "actionName": "models",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "ARCHIVE",
+                                            "pieceVersion": "0.0.7",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "name": "step_19",
+                                            "type": "PIECE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "apiKey": "{{trigger.body.auth.apiKey}}",
+                                                "output": "{{step_15['content']}}",
+                                                "tenantId": "{{trigger.body.tenantId}}",
+                                                "workerId": "{{trigger.body.workerId}}",
+                                                "workerRecordId": "{{trigger.body.workerRecordId}}"
+                                              },
+                                              "pieceName": "@activepieces/piece-utilities",
+                                              "pieceType": "CUSTOM",
+                                              "actionName": "agent_output",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "packageType": "ARCHIVE",
+                                              "pieceVersion": "0.2.13",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "displayName": "Agent Output Copy"
+                                          },
+                                          "displayName": "Models Copy"
+                                        },
+                                        "displayName": "Prompt to check Invoice consistency"
+                                      },
+                                      "displayName": "Fetch all orders of the company Copy"
+                                    },
+                                    {
+                                      "name": "step_18",
+                                      "type": "PIECE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "apiKey": "{{trigger.body.auth.apiKey}}",
+                                          "output": "Invalid Invoice/Purchase Order does not exist",
+                                          "tenantId": "{{trigger.body.tenantId}}",
+                                          "workerId": "{{trigger.body.workerId}}",
+                                          "workerRecordId": "{{trigger.body.workerRecordId}}"
+                                        },
+                                        "pieceName": "@activepieces/piece-utilities",
+                                        "pieceType": "CUSTOM",
+                                        "actionName": "agent_output",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "ARCHIVE",
+                                        "pieceVersion": "0.2.13",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "displayName": "Agent Output"
+                                    }
+                                  ],
+                                  "settings": {
+                                    "branches": [
+                                      {
+                                        "branchName": "On Success",
+                                        "branchType": "CONDITION",
+                                        "conditions": [
+                                          [
+                                            {
+                                              "operator": "BOOLEAN_IS_TRUE",
+                                              "firstValue": "{{step_13['content']}}"
+                                            }
+                                          ]
+                                        ]
+                                      },
+                                      {
+                                        "branchName": "Otherwise",
+                                        "branchType": "FALLBACK"
+                                      }
+                                    ],
+                                    "inputUiInfo": {},
+                                    "executionType": "EXECUTE_FIRST_MATCH"
+                                  },
+                                  "displayName": "Branch"
+                                },
+                                "displayName": "Models"
+                              },
+                              "displayName": "Prompt to find issue id"
+                            },
+                            "displayName": "Fetch all orders of the company"
+                          },
+                          "displayName": "Models"
+                        }
+                      ],
+                      "settings": {
+                        "branches": [
+                          {
+                            "branchName": "On Success",
+                            "branchType": "CONDITION",
+                            "conditions": [
+                              [
+                                {
+                                  "operator": "TEXT_CONTAINS",
+                                  "firstValue": "{{step_8['body']['issues'][0]['fields']['summary']}}",
+                                  "secondValue": "{{step_6['orderDetails']['orderNumber']}}",
+                                  "caseSensitive": false
+                                }
+                              ]
+                            ]
+                          },
+                          {
+                            "branchName": "Otherwise",
+                            "branchType": "FALLBACK"
+                          }
+                        ],
+                        "inputUiInfo": {},
+                        "executionType": "EXECUTE_FIRST_MATCH"
+                      },
+                      "nextAction": {
+                        "name": "step_22",
+                        "type": "PIECE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "apiKey": "{{trigger.body.auth.apiKey}}",
+                            "output": "{{step_4['content']}}",
+                            "tenantId": "{{trigger.body.tenantId}}",
+                            "workerId": "{{trigger.body.workerId}}",
+                            "workerRecordId": "{{trigger.body.workerRecordId}}"
+                          },
+                          "pieceName": "@activepieces/piece-utilities",
+                          "pieceType": "CUSTOM",
+                          "actionName": "agent_output",
+                          "inputUiInfo": {},
+                          "packageType": "ARCHIVE",
+                          "pieceVersion": "0.2.13",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "displayName": "Advanced Agent Dashboard Settings Copy"
+                      },
+                      "displayName": "Branch"
+                    },
+                    "displayName": "Custom API Call"
+                  },
+                  "displayName": "Models"
+                },
+                "displayName": "Code"
+              },
+              "displayName": "Models"
+            },
+            "displayName": "Prompt"
+          },
+          "displayName": "Email Data"
+        },
+        "displayName": "Inputs"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

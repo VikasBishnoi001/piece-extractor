@@ -1,0 +1,763 @@
+{
+  "created": "1737174806823",
+  "updated": "1737174806823",
+  "name": "Calendar Invite Creation Agent",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-store",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-http",
+    "@activepieces/piece-google-calendar"
+  ],
+  "template": {
+    "displayName": "Calendar Invite Creation Agent",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": "{{trigger.body.file.content}}"
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "text_input",
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_7",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "attendee",
+              "store_scope": "COLLECTION"
+            },
+            "pieceName": "@activepieces/piece-store",
+            "pieceType": "OFFICIAL",
+            "actionName": "remove_value",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "REGISTRY",
+            "pieceVersion": "0.5.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_16",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "input": "You are a data analyzer. You will be provided with multiple transcripts or meeting notes. Your task is to understand those transcripts and generate a valid JSON with key-value pairs including title, startTime, date, participants_names, and a description summarizing the key discussion points.\nIf any participant has discussed rescheduling or scheduling a meeting, include the details as described below.\nWhen participants mention terms like 'today,' 'tomorrow,' or 'day after tomorrow,' adjust the date and time accordingly based on the meeting notes' original date.\nIf multiple invites or scheduling on specific days are discussed, return a list of JSON objects with the appropriate reschedule details.\nIf there is no mention of rescheduling or scheduling, still output an empty array.\nGuidelines:\nUse startTime in Google Calendar format, combining both date and time.\nFor participants_names, only include valid email addresses.\nYour output should always include the meeting's existing details unless rescheduling is explicitly indicated.\n\nThe JSON structure should look like this:\n[\n  {\n    \"participants_names\": [\"\", \"\"],\n    \"startTime\": \"\",\n    \"date\": \"\",\n    \"endTime\": \"\",\n    \"title\": \"\",\n    \"description\": \"\"\n  },\n  {\n    \"participants_names\": [\"\", \"\"],\n    \"startTime\": \"\",\n    \"date\": \"\",\n    \"endTime\": \"\",\n    \"title\": \"\",\n    \"description\": \"\"\n  }\n]\n\nNote: Do not give ```json or  in the output.\n\n{{trigger.body.instructions}}"
+              },
+              "pieceName": "@activepieces/piece-inputs",
+              "pieceType": "CUSTOM",
+              "actionName": "text_input",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_2",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "auth": "{{connections['zbrain-ai']}}",
+                  "model": "gpt-4o",
+                  "messages": [
+                    {
+                      "role": "system",
+                      "content": "{{step_16}}"
+                    },
+                    {
+                      "role": "user",
+                      "content": "Meeting notes - {{step_1}}"
+                    }
+                  ],
+                  "maxTokens": "4096",
+                  "temperature": "0.7"
+                },
+                "pieceName": "@activepieces/piece-zbrain-ai",
+                "pieceType": "CUSTOM",
+                "actionName": "models",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "ARCHIVE",
+                "pieceVersion": "0.0.6",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_6",
+                "type": "CODE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "extracted_data": "{{step_2}}"
+                  },
+                  "sourceCode": {
+                    "code": "export const code = (inputs: { extracted_data: any }) => {\n    let jsonData;\n\n    if (typeof inputs.extracted_data === 'string') {\n        try {\n            jsonData = JSON.parse(inputs.extracted_data);\n        } catch (error) {\n            throw new Error(\"Failed to parse extracted_data: \" + error.message);\n        }\n    } else {\n        jsonData = inputs.extracted_data;\n    }\n\n    if (typeof jsonData.content === 'string') {\n        try {\n            jsonData = JSON.parse(jsonData.content);\n        } catch (error) {\n            throw new Error(\"Failed to parse content: \" + error.message);\n        }\n    }\n\n    if (!Array.isArray(jsonData)) {\n        throw new Error(\"Expected an array in content\");\n    }\n\n    const convertToIST = (dateTimeStr: string) => {\n        const dateTime = new Date(dateTimeStr);\n        const IST_OFFSET = 5.5 * 60 * 60 * 1000;\n        const istDateTime = new Date(dateTime.getTime() + IST_OFFSET);\n        return istDateTime;\n    };\n\n    const formatDateTime = (date: Date) => {\n        return date.toISOString().replace(\"T\", \" \").slice(0, 16);\n    };\n\n    const extractedDataList = [];\n\n    for (const entry of jsonData) {\n        const extractedData = {\n            participants_names: entry.participants_names || [],\n            startTime: '',\n            date: '',\n            endTime: '',\n            title: entry.title || '',\n            description: entry.description || ''\n        };\n\n        if (entry.startTime) {\n            const istDateTime = convertToIST(entry.startTime);\n            const [date, startTime] = formatDateTime(istDateTime).split(\" \");\n\n            const endISTDateTime = new Date(istDateTime.getTime() + 60 * 60 * 1000);\n            const endTime = formatDateTime(endISTDateTime).split(\" \")[1];\n\n            extractedData.date = date;\n            extractedData.startTime = startTime;\n            extractedData.endTime = endTime;\n        }\n\n        extractedDataList.push(extractedData);\n    }\n\n    return extractedDataList;\n};\n",
+                    "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                  },
+                  "inputUiInfo": {},
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_17",
+                  "type": "ROUTER",
+                  "valid": true,
+                  "children": [
+                    {
+                      "name": "step_18",
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "url": "https://app.zbrain.ai:3012/api/worker-records/{{trigger.body.workerRecordId}}",
+                          "body": {
+                            "output": {
+                              "markdown": "No meeting is scheduled as no future reschedule has been requested."
+                            },
+                            "tenantId": "{{trigger.body.tenantId}}",
+                            "workerId": "{{trigger.body.workerId}}"
+                          },
+                          "method": "PUT",
+                          "headers": {
+                            "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                          },
+                          "failsafe": false,
+                          "queryParams": {}
+                        },
+                        "pieceName": "@activepieces/piece-http",
+                        "pieceType": "OFFICIAL",
+                        "actionName": "send_request",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "REGISTRY",
+                        "pieceVersion": "0.3.10",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Call Agent to inform about meeting not scheduled"
+                    },
+                    {
+                      "name": "step_15",
+                      "type": "LOOP_ON_ITEMS",
+                      "valid": true,
+                      "settings": {
+                        "items": "{{step_6}}",
+                        "inputUiInfo": {}
+                      },
+                      "nextAction": {
+                        "name": "step_21",
+                        "type": "PIECE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "key": "meetingDetails",
+                            "store_scope": "COLLECTION",
+                            "defaultValue": "undefined"
+                          },
+                          "pieceName": "@activepieces/piece-store",
+                          "pieceType": "OFFICIAL",
+                          "actionName": "get",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "pieceVersion": "0.5.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_22",
+                          "type": "ROUTER",
+                          "valid": true,
+                          "children": [
+                            {
+                              "name": "step_23",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "url": "https://app.zbrain.ai:3012/api/worker-records/{{trigger.body.workerRecordId}}",
+                                  "body": {
+                                    "output": {
+                                      "markdown": "Meeting not scheduled – all required participants are unavailable for the selected time slot."
+                                    },
+                                    "tenantId": "{{trigger.body.tenantId}}",
+                                    "workerId": "{{trigger.body.workerId}}"
+                                  },
+                                  "method": "PUT",
+                                  "headers": {
+                                    "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                                  },
+                                  "failsafe": false,
+                                  "queryParams": {}
+                                },
+                                "pieceName": "@activepieces/piece-http",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "send_request",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "0.3.10",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "displayName": "Call Agent to inform about meeting not scheduled"
+                            },
+                            {
+                              "name": "step_19",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "auth": "{{connections['zbrain-ai']}}",
+                                  "model": "gpt-4o",
+                                  "messages": [
+                                    {
+                                      "role": "system",
+                                      "content": "You are a helpful assistant. Your task is to create a simple notification or message about a scheduled meeting(s)."
+                                    },
+                                    {
+                                      "role": "user",
+                                      "content": "Here are the meeting(s) \n{{step_21}}"
+                                    }
+                                  ],
+                                  "maxTokens": "4096",
+                                  "temperature": "0.7"
+                                },
+                                "pieceName": "@activepieces/piece-zbrain-ai",
+                                "pieceType": "CUSTOM",
+                                "actionName": "models",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "ARCHIVE",
+                                "pieceVersion": "0.0.6",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_8",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "url": "https://app.zbrain.ai:3012/api/worker-records/{{trigger.body.workerRecordId}}",
+                                    "body": {
+                                      "output": {
+                                        "markdown": "{{step_19}}"
+                                      },
+                                      "tenantId": "{{trigger.body.tenantId}}",
+                                      "workerId": "{{trigger.body.workerId}}"
+                                    },
+                                    "method": "PUT",
+                                    "headers": {
+                                      "Authorization": "Bearer {{trigger.body.auth.apiKey}}"
+                                    },
+                                    "failsafe": false,
+                                    "queryParams": {}
+                                  },
+                                  "pieceName": "@activepieces/piece-http",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "send_request",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "0.3.10",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "displayName": "Call Agent for meeting scheduled"
+                              },
+                              "displayName": "Get scheduled meeting response from model"
+                            }
+                          ],
+                          "settings": {
+                            "branches": [
+                              {
+                                "branchName": "On Success",
+                                "branchType": "CONDITION",
+                                "conditions": [
+                                  [
+                                    {
+                                      "operator": "TEXT_EXACTLY_MATCHES",
+                                      "firstValue": "{{step_21}}",
+                                      "secondValue": "undefined",
+                                      "caseSensitive": false
+                                    }
+                                  ]
+                                ]
+                              },
+                              {
+                                "branchName": "Otherwise",
+                                "branchType": "FALLBACK"
+                              }
+                            ],
+                            "inputUiInfo": {},
+                            "executionType": "EXECUTE_FIRST_MATCH"
+                          },
+                          "nextAction": {
+                            "name": "step_24",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "key": "meetingDetails",
+                                "store_scope": "COLLECTION"
+                              },
+                              "pieceName": "@activepieces/piece-store",
+                              "pieceType": "OFFICIAL",
+                              "actionName": "remove_value",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "pieceVersion": "0.5.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "displayName": "Remove"
+                          },
+                          "displayName": "Branch"
+                        },
+                        "displayName": "Get"
+                      },
+                      "displayName": "Loop on List of Invites",
+                      "firstLoopAction": {
+                        "name": "step_10",
+                        "type": "LOOP_ON_ITEMS",
+                        "valid": true,
+                        "settings": {
+                          "items": "{{step_15['item']['participants_names']}}",
+                          "inputUiInfo": {}
+                        },
+                        "nextAction": {
+                          "name": "step_11",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "key": "attendee",
+                              "store_scope": "COLLECTION",
+                              "defaultValue": "undefined"
+                            },
+                            "pieceName": "@activepieces/piece-store",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "get",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "0.5.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_14",
+                            "type": "ROUTER",
+                            "valid": true,
+                            "children": [
+                              null,
+                              {
+                                "name": "step_3",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "auth": "{{connections['google-calendar']}}",
+                                    "title": "{{step_15['item']['title']}}",
+                                    "attendees": "{{step_11}}",
+                                    "calendar_id": "mehaka@leewayhertz.com",
+                                    "start_date_time": "{{step_15['item']['date']}}T{{step_15['item']['startTime']}}:00+05:30",
+                                    "guests_can_modify": true,
+                                    "send_notifications": "all",
+                                    "guests_can_invite_others": true,
+                                    "guests_can_see_other_guests": false
+                                  },
+                                  "pieceName": "@activepieces/piece-google-calendar",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "create_google_calendar_event",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {
+                                      "attendees": true
+                                    }
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "0.5.5",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "name": "step_20",
+                                  "type": "PIECE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "key": "meetingDetails",
+                                      "value": "Meeting details:\nDate - {{step_15['item']['date']}}\nTitle - {{step_15['item']['title']}}\nTime - {{step_15['item']['startTime']}}\nDescription of the meeting - {{step_15['item']['description']}}\nparticipants - {{step_11}}\nEvent url - {{step_3['htmlLink']}}",
+                                      "separator": "\\n\\n",
+                                      "store_scope": "COLLECTION"
+                                    },
+                                    "pieceName": "@activepieces/piece-store",
+                                    "pieceType": "OFFICIAL",
+                                    "actionName": "append",
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "packageType": "REGISTRY",
+                                    "pieceVersion": "0.5.1",
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "displayName": "Append"
+                                },
+                                "displayName": "Create Event"
+                              }
+                            ],
+                            "settings": {
+                              "branches": [
+                                {
+                                  "branchName": "On Success",
+                                  "branchType": "CONDITION",
+                                  "conditions": [
+                                    [
+                                      {
+                                        "operator": "TEXT_EXACTLY_MATCHES",
+                                        "firstValue": "{{step_11}}",
+                                        "secondValue": "undefined",
+                                        "caseSensitive": false
+                                      }
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "branchName": "Otherwise",
+                                  "branchType": "FALLBACK"
+                                }
+                              ],
+                              "inputUiInfo": {},
+                              "executionType": "EXECUTE_FIRST_MATCH"
+                            },
+                            "nextAction": {
+                              "name": "step_12",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "key": "attendee",
+                                  "store_scope": "COLLECTION"
+                                },
+                                "pieceName": "@activepieces/piece-store",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "remove_value",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "0.5.1",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "displayName": "Remove"
+                            },
+                            "displayName": "Branch"
+                          },
+                          "displayName": "Get Participants Names"
+                        },
+                        "displayName": "Loop on Participants",
+                        "firstLoopAction": {
+                          "name": "step_5",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['google-calendar']}}",
+                              "end_date": "{{step_15['item']['date']}}T{{step_15['item']['endTime']}}+05:30",
+                              "start_date": "{{step_15['item']['date']}}T{{step_15['item']['startTime']}}+05:30",
+                              "calendar_id": "{{step_10['item']}}",
+                              "event_types": [
+                                "default"
+                              ]
+                            },
+                            "pieceName": "@activepieces/piece-google-calendar",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "google_calendar_get_events",
+                            "inputUiInfo": {
+                              "customizedInputs": {
+                                "calendar_id": true,
+                                "event_types": false
+                              }
+                            },
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "0.5.5",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": true
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_13",
+                            "type": "CODE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "jsonData": "{{step_5['body']['items']}}"
+                              },
+                              "sourceCode": {
+                                "code": "export const code = async (inputs) => {\n    if(inputs.jsonData.length === 0){\n        return (\"No meeting is scheduled\");\n    }\n    else{\n        return (\"Meeting already scheduled\");\n    }\n};",
+                                "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                              },
+                              "inputUiInfo": {},
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_4",
+                              "type": "ROUTER",
+                              "valid": true,
+                              "children": [
+                                {
+                                  "name": "step_9",
+                                  "type": "PIECE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "key": "attendee",
+                                      "value": "{{step_10['item']}}",
+                                      "store_scope": "COLLECTION",
+                                      "ignore_if_exists": false
+                                    },
+                                    "pieceName": "@activepieces/piece-store",
+                                    "pieceType": "OFFICIAL",
+                                    "actionName": "add_to_list",
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "packageType": "REGISTRY",
+                                    "pieceVersion": "0.5.1",
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "displayName": "Store Participants Names"
+                                },
+                                null
+                              ],
+                              "settings": {
+                                "branches": [
+                                  {
+                                    "branchName": "On Success",
+                                    "branchType": "CONDITION",
+                                    "conditions": [
+                                      [
+                                        {
+                                          "operator": "TEXT_EXACTLY_MATCHES",
+                                          "firstValue": "{{step_13}}",
+                                          "secondValue": "No meeting is scheduled",
+                                          "caseSensitive": false
+                                        }
+                                      ]
+                                    ]
+                                  },
+                                  {
+                                    "branchName": "Otherwise",
+                                    "branchType": "FALLBACK"
+                                  }
+                                ],
+                                "inputUiInfo": {},
+                                "executionType": "EXECUTE_FIRST_MATCH"
+                              },
+                              "displayName": "Branch"
+                            },
+                            "displayName": "Check for already created Events"
+                          },
+                          "displayName": "Get all Events for each participant"
+                        }
+                      }
+                    }
+                  ],
+                  "settings": {
+                    "branches": [
+                      {
+                        "branchName": "On Success",
+                        "branchType": "CONDITION",
+                        "conditions": [
+                          [
+                            {
+                              "operator": "TEXT_EXACTLY_MATCHES",
+                              "firstValue": "{{step_6}}",
+                              "secondValue": "[]",
+                              "caseSensitive": false
+                            }
+                          ]
+                        ]
+                      },
+                      {
+                        "branchName": "Otherwise",
+                        "branchType": "FALLBACK"
+                      }
+                    ],
+                    "inputUiInfo": {},
+                    "executionType": "EXECUTE_FIRST_MATCH"
+                  },
+                  "displayName": "Branch"
+                },
+                "displayName": "Json Parser"
+              },
+              "displayName": "Get the meeting schedules from model"
+            },
+            "displayName": "Instructions for scheduling meeting"
+          },
+          "displayName": "Remove"
+        },
+        "displayName": "Meeting Notes"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

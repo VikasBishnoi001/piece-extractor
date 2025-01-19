@@ -1,0 +1,951 @@
+{
+  "created": "1737174745445",
+  "updated": "1737174745445",
+  "name": "MeetingPrepReport",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-google-calendar",
+    "@activepieces/piece-zbrain-ai",
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-http",
+    "@activepieces/piece-store",
+    "@activepieces/piece-gmail",
+    "@activepieces/piece-google-docs"
+  ],
+  "template": {
+    "displayName": "MeetingPrepReport",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.0.1",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {},
+        "inputUiInfo": {},
+        "triggerName": "catch_request"
+      },
+      "nextAction": {
+        "name": "step_2",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "auth": "{{connections['google-calendar']}}",
+            "calendar_id": "vikasb@leewayhertz.com",
+            "event_types": [
+              "default",
+              "focusTime",
+              "outOfOffice"
+            ],
+            "singleEvents": false
+          },
+          "pieceName": "@activepieces/piece-google-calendar",
+          "pieceType": "OFFICIAL",
+          "actionName": "google_calendar_get_events",
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "packageType": "REGISTRY",
+          "pieceVersion": "~0.5.6",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_7",
+          "type": "CODE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "data": "{{step_2['body']['items']}}"
+            },
+            "sourceCode": {
+              "code": "export const code = async (inputs) => {\n  try {\n    const items = inputs?.data;\n\n    // Validate that items is an array\n    if (!Array.isArray(items)) {\n      return {\n        status: 400,\n        message: \"Invalid input data format. Expected an array.\",\n      };\n    }\n\n    // Validate that the array is not empty\n    if (items.length === 0) {\n      return {\n        status: 404,\n        message: \"No items found.\",\n      };\n    }\n\n    // Return the last item in the array\n    const lastEvent = items[items.length - 1];\n\n    return {\n      status: 200,\n      lastEvent,\n    };\n  } catch (error) {\n    // Catch unexpected errors\n    return {\n      status: 500,\n      message: \"An unexpected error occurred.\",\n      error: error.message,\n    };\n  }\n};\n",
+              "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+            },
+            "inputUiInfo": {},
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_3",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['zbrain-ai']}}",
+                "model": "chatgpt-4o-latest",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "You are a helpful assistant. Extract user information from event attendee, excluding those associated with the company 'Leewayhertz'. Output the response in JSON format, including only the email, organizer status, and response status. Ensure that the output is a list of JSON objects."
+                  },
+                  {
+                    "role": "user",
+                    "content": "Please extract the organizer data from the following input:{{step_7['lastEvent']}} and provide the result in the following format: [{\"email\": \"user_email@example.com\", \"organizer\": true, \"responseStatus\": \"accepted\"}]."
+                  }
+                ],
+                "maxTokens": "2048",
+                "temperature": "0.5"
+              },
+              "pieceName": "@activepieces/piece-zbrain-ai",
+              "pieceType": "CUSTOM",
+              "actionName": "models",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "ARCHIVE",
+              "pieceVersion": "~0.0.7",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_1",
+              "type": "CODE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "user": "{{step_3}}"
+                },
+                "sourceCode": {
+                  "code": "export const code = async (inputs) => {\n  // Extract the content from the response, removing unwanted characters like backticks and newlines\n  const content = inputs.user.content.replace(/```json\\n|\\n```/g, '').trim();  // Removes backticks and newlines\n\n  // Parse the cleaned content as JSON\n  const parsedInputs = JSON.parse(content);\n\n  // Function to extract the company name from the email\n  const getCompanyName = (email) => {\n    // Split email at '@' and take the second part (domain), then split by '.' to remove TLD\n    const domain = email.split('@')[1].split('.')[0];\n    // Capitalize the first letter of each word in the domain\n    return domain.charAt(0).toUpperCase() + domain.slice(1);\n  };\n\n  // Function to extract the name from the email\n  const getNameFromEmail = (email) => {\n    // Split email at '@' and take the first part (local part)\n    const localPart = email.split('@')[0];\n    // Capitalize the first letter of each word in the local part\n    return localPart.charAt(0).toUpperCase() + localPart.slice(1);\n  };\n\n  // Loop through the array and extract the information\n  const extractedData = parsedInputs.map(item => {\n    const companyName = getCompanyName(item.email);\n    const name = getNameFromEmail(item.email);\n\n    return {\n      name: name,  // Name extracted from the email's local part\n      email: item.email,\n      organizer: item.organizer,\n      domainName: companyName,  // Extracted company name from the email's domain\n      responseStatus: item.responseStatus\n    };\n  });\n\n  // Return the extracted data in the desired format\n  return extractedData;\n};\n",
+                  "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                },
+                "inputUiInfo": {},
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_4",
+                "type": "CODE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "domain": "{{step_1[0]['domainName']}}"
+                  },
+                  "sourceCode": {
+                    "code": "export const code = async (inputs: { domain: string }): Promise<boolean> => {\n  // Predefined list of generic email domains without .com\n  const genericDomains: Set<string> = new Set([\n    \"gmail\", \"yahoo\", \"hotmail\", \"microsoft\", \"outlook\",\n    \"live\", \"icloud\", \"aol\", \"mail\",\n    \"yandex\", \"protonmail\", \"zoho\", \"gmx\",\n    \"yopmail\", \"fastmail\", \"hushmail\", \"tutanota\"\n  ]);\n\n  // Get the domain from inputs, convert to lowercase, and remove .com if present\n  const domain: string = inputs.domain.toLowerCase().replace(\".com\", \"\");\n\n  // Check if domain is in the list of generic domains\n  if (genericDomains.has(domain)) {\n    return false; // It's a generic email domain\n  }\n  return true; // It's a company domain\n};\n",
+                    "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                  },
+                  "inputUiInfo": {},
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_28",
+                  "type": "PIECE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "input": [
+                        {
+                          "name": "Udesh2568",
+                          "email": "udesh2568@gmail.com",
+                          "organizer": true,
+                          "domainName": "Gmail",
+                          "responseStatus": "accepted"
+                        },
+                        {
+                          "name": "Vikas",
+                          "email": "vikasbishnoi82289@gmail.com",
+                          "organizer": false,
+                          "domainName": "Micrsoft",
+                          "responseStatus": "accepted"
+                        },
+                        {
+                          "name": "Udesh2568",
+                          "email": "udesh2568@gmail.com",
+                          "organizer": true,
+                          "domainName": "Gmail",
+                          "responseStatus": "accepted"
+                        },
+                        {
+                          "name": "VikasBishnoi",
+                          "email": "vikasbishnoi99916@gmail.com",
+                          "organizer": false,
+                          "domainName": "Leewayhertz",
+                          "responseStatus": "accepted"
+                        }
+                      ]
+                    },
+                    "pieceName": "@activepieces/piece-inputs",
+                    "pieceType": "CUSTOM",
+                    "actionName": "json_input",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "ARCHIVE",
+                    "pieceVersion": "~0.0.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_24",
+                    "type": "CODE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "users": "{{step_28}}"
+                      },
+                      "sourceCode": {
+                        "code": "export const code = async (inputs) => {\n  const users = inputs.users;\n\n  // Predefined list of generic email domains (without '.com')\n  const genericDomains: Set<string> = new Set([\n    \"gmail\", \"yahoo\", \"hotmail\", \"outlook\",\n    \"live\", \"icloud\", \"aol\", \"mail\",\n    \"yandex\", \"protonmail\", \"zoho\", \"gmx\",\n    \"yopmail\", \"fastmail\", \"hushmail\", \"tutanota\"\n  ]);\n\n  // Filter users with non-generic domains\n  const nonGenericUsers = users.filter(user => !genericDomains.has(user.domainName.toLowerCase()));\n\n  // Return the result with the filtered users\n  return {\n    users: nonGenericUsers,  // Array of users with non-generic domains\n    result: nonGenericUsers.length > 0 // True if there are any non-generic domains, false otherwise\n  };\n};\n",
+                        "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                      },
+                      "inputUiInfo": {},
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_5",
+                      "type": "ROUTER",
+                      "valid": true,
+                      "children": [
+                        {
+                          "name": "step_26",
+                          "type": "LOOP_ON_ITEMS",
+                          "valid": true,
+                          "settings": {
+                            "items": "{{step_24['users']}}",
+                            "inputUiInfo": {}
+                          },
+                          "displayName": "Loop on Items",
+                          "firstLoopAction": {
+                            "name": "step_6",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "url": "https://serpapi.com/search",
+                                "method": "GET",
+                                "headers": {},
+                                "failsafe": false,
+                                "queryParams": {
+                                  "q": "Get information on linkdin profile﻿{{step_26['item']['name']}}﻿ from this company intitle:{{step_26['item']['domainName']}}",
+                                  "num": "2",
+                                  "engine": "google",
+                                  "api_key": "ec46c877dcf225b01f8e14ff6a27a5ee9988c0a4f46f785beacd486c7f2e0ba0"
+                                }
+                              },
+                              "pieceName": "@activepieces/piece-http",
+                              "pieceType": "OFFICIAL",
+                              "actionName": "send_request",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "pieceVersion": "~0.3.10",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_9",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "auth": "{{connections['zbrain-ai']}}",
+                                  "model": "chatgpt-4o-latest",
+                                  "messages": [
+                                    {
+                                      "role": "system",
+                                      "content": "You are a helpful assistant."
+                                    },
+                                    {
+                                      "role": "user",
+                                      "content": "Summarize the professional profile based on the following data: {{step_6['body']['organic_results'][0]}}. Provide a brief, clear description of the person including their name, job title, company, location, and main professional focus."
+                                    }
+                                  ],
+                                  "maxTokens": "2048",
+                                  "temperature": "0.5"
+                                },
+                                "pieceName": "@activepieces/piece-zbrain-ai",
+                                "pieceType": "CUSTOM",
+                                "actionName": "models",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "ARCHIVE",
+                                "pieceVersion": "~0.0.7",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_10",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "key": "userProfile",
+                                    "value": "{{step_9['content']}}",
+                                    "store_scope": "COLLECTION"
+                                  },
+                                  "pieceName": "@activepieces/piece-store",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "append",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "~0.5.4",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "displayName": "Append"
+                              },
+                              "displayName": "Summrize the User Profile"
+                            },
+                            "displayName": "Search User Profile"
+                          }
+                        },
+                        {
+                          "name": "step_8",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "url": "https://serpapi.com/search",
+                              "method": "GET",
+                              "headers": {},
+                              "failsafe": false,
+                              "queryParams": {
+                                "q": "Get information on linkdin profile{{step_1[0]['name']}} from this company intitle: {{step_1[0]['domainName']}}",
+                                "num": "2",
+                                "engine": "google",
+                                "api_key": "ec46c877dcf225b01f8e14ff6a27a5ee9988c0a4f46f785beacd486c7f2e0ba0"
+                              }
+                            },
+                            "pieceName": "@activepieces/piece-http",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "send_request",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "~0.3.10",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_11",
+                            "type": "PIECE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "auth": "{{connections['zbrain-ai']}}",
+                                "model": "chatgpt-4o-latest",
+                                "messages": [
+                                  {
+                                    "role": "system",
+                                    "content": "You are a helpful assistant. Always include the following disclaimer at the end of your responses: 'Note: This information may not be exact or complete as it has been obtained through Google search results.'"
+                                  },
+                                  {
+                                    "role": "user",
+                                    "content": "Summarize the professional profile based on the following data: {{step_8['body']['organic_results'][0]}} . Provide a brief, clear description of the person including their name, job title, company, location, and main professional focus."
+                                  }
+                                ],
+                                "maxTokens": "2048",
+                                "temperature": "0.5"
+                              },
+                              "pieceName": "@activepieces/piece-zbrain-ai",
+                              "pieceType": "CUSTOM",
+                              "actionName": "models",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "ARCHIVE",
+                              "pieceVersion": "~0.0.7",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "name": "step_12",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "key": "userProfile",
+                                  "value": "{{step_11['content']}}",
+                                  "store_scope": "COLLECTION"
+                                },
+                                "pieceName": "@activepieces/piece-store",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "append",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "~0.5.4",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "displayName": "Append Copy"
+                            },
+                            "displayName": "Summrize the User Profile Copy"
+                          },
+                          "displayName": "Search User Profile Copy"
+                        }
+                      ],
+                      "settings": {
+                        "branches": [
+                          {
+                            "branchName": "On Success",
+                            "branchType": "CONDITION",
+                            "conditions": [
+                              [
+                                {
+                                  "operator": "TEXT_EXACTLY_MATCHES",
+                                  "firstValue": "{{step_24['result']}}",
+                                  "secondValue": "true",
+                                  "caseSensitive": false
+                                }
+                              ]
+                            ]
+                          },
+                          {
+                            "branchName": "Otherwise",
+                            "branchType": "FALLBACK"
+                          }
+                        ],
+                        "inputUiInfo": {},
+                        "executionType": "EXECUTE_FIRST_MATCH"
+                      },
+                      "nextAction": {
+                        "name": "step_13",
+                        "type": "PIECE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "key": "userProfile",
+                            "store_scope": "COLLECTION"
+                          },
+                          "pieceName": "@activepieces/piece-store",
+                          "pieceType": "OFFICIAL",
+                          "actionName": "get",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "pieceVersion": "~0.5.4",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "name": "step_14",
+                          "type": "PIECE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "key": "userProfile",
+                              "store_scope": "COLLECTION"
+                            },
+                            "pieceName": "@activepieces/piece-store",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "remove_value",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "pieceVersion": "~0.5.4",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "name": "step_25",
+                            "type": "LOOP_ON_ITEMS",
+                            "valid": true,
+                            "settings": {
+                              "items": "{{step_24['users']}}",
+                              "inputUiInfo": {}
+                            },
+                            "nextAction": {
+                              "name": "step_29",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "key": "messageId",
+                                  "store_scope": "COLLECTION"
+                                },
+                                "pieceName": "@activepieces/piece-store",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "get",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "~0.5.4",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_31",
+                                "type": "CODE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "id": "{{step_29}}"
+                                  },
+                                  "sourceCode": {
+                                    "code": "export const code = async (inputs) => {\n  // Parse the input (which is an array of stringified JSON objects)\n  let data;\n  try {\n    data = inputs.id.map(item => JSON.parse(item)); // Parse each item in the array\n  } catch (error) {\n    throw new Error(\"Invalid input format: Unable to parse JSON\");\n  }\n  console.log(data)\n\n  // Extract all ids from the parsed data\n   const ids = data.flat().map(item => item.id);\n\n  return ids;  // Return the list of ids\n};\n",
+                                    "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                  },
+                                  "inputUiInfo": {},
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "name": "step_30",
+                                  "type": "PIECE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "key": "messageId",
+                                      "store_scope": "COLLECTION"
+                                    },
+                                    "pieceName": "@activepieces/piece-store",
+                                    "pieceType": "OFFICIAL",
+                                    "actionName": "remove_value",
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "packageType": "REGISTRY",
+                                    "pieceVersion": "~0.5.4",
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "name": "step_16",
+                                    "type": "LOOP_ON_ITEMS",
+                                    "valid": true,
+                                    "settings": {
+                                      "items": "{{step_31}}",
+                                      "inputUiInfo": {}
+                                    },
+                                    "nextAction": {
+                                      "name": "step_20",
+                                      "type": "PIECE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "key": "gmails",
+                                          "store_scope": "COLLECTION"
+                                        },
+                                        "pieceName": "@activepieces/piece-store",
+                                        "pieceType": "OFFICIAL",
+                                        "actionName": "get",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "pieceVersion": "~0.5.4",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "name": "step_21",
+                                        "type": "PIECE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "auth": "{{connections['zbrain-ai']}}",
+                                            "model": "chatgpt-4o-latest",
+                                            "messages": [
+                                              {
+                                                "role": "system",
+                                                "content": "Analyze the user's email data to extract and summarize key information for meeting preparation. Include details like meeting dates, times, participants, agendas, and action items in a clear, structured format. Ensure that the user's profile information is added at the very end of the meeting preparation report."
+                                              },
+                                              {
+                                                "role": "user",
+                                                "content": "I will provide you with my emails:{{step_20}} and profile information: {{step_13}}. Please analyze them and generate a meeting preparation report."
+                                              }
+                                            ],
+                                            "maxTokens": "2048",
+                                            "temperature": "0.5"
+                                          },
+                                          "pieceName": "@activepieces/piece-zbrain-ai",
+                                          "pieceType": "CUSTOM",
+                                          "actionName": "models",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "ARCHIVE",
+                                          "pieceVersion": "~0.0.7",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "name": "step_22",
+                                          "type": "PIECE",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "auth": "{{connections['google-docs']}}",
+                                              "body": "{{step_21['content']}}",
+                                              "title": "Meeting-Prep_report"
+                                            },
+                                            "pieceName": "@activepieces/piece-google-docs",
+                                            "pieceType": "OFFICIAL",
+                                            "actionName": "create_document",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "pieceVersion": "~0.1.8",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "name": "step_23",
+                                            "type": "PIECE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "body": {
+                                                  "response": "{{step_21['content']}}"
+                                                },
+                                                "status": "200",
+                                                "headers": {}
+                                              },
+                                              "pieceName": "@activepieces/piece-http",
+                                              "pieceType": "OFFICIAL",
+                                              "actionName": "return_response",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "packageType": "REGISTRY",
+                                              "pieceVersion": "~0.3.10",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "displayName": "Return Response"
+                                          },
+                                          "displayName": "Create Document"
+                                        },
+                                        "displayName": "Genrate Meeting report"
+                                      },
+                                      "displayName": "Get"
+                                    },
+                                    "displayName": "Loop on Items",
+                                    "firstLoopAction": {
+                                      "name": "step_17",
+                                      "type": "PIECE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "url": {
+                                            "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/{{step_16['item']}}?format=full"
+                                          },
+                                          "auth": "{{connections['gmail-vikas']}}",
+                                          "method": "GET",
+                                          "headers": {},
+                                          "failsafe": false,
+                                          "queryParams": {}
+                                        },
+                                        "pieceName": "@activepieces/piece-gmail",
+                                        "pieceType": "OFFICIAL",
+                                        "actionName": "custom_api_call",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "pieceVersion": "~0.7.2",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "name": "step_18",
+                                        "type": "CODE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "payload": "{{step_17['body']['payload']}}"
+                                          },
+                                          "sourceCode": {
+                                            "code": "import { Buffer } from 'buffer';\n\nexport const code = async (inputs: { payload: any }) => {\n  // Helper function to decode Base64 URL-encoded data\n  const decodeBase64Url = (data: string): string => {\n    // Replace URL-safe characters and add missing padding if necessary\n    data = data.replace(/-/g, '+').replace(/_/g, '/');\n    const padLength = 4 - (data.length % 4);\n    if (padLength < 4) {\n      data += '='.repeat(padLength);\n    }\n    // Decode the Base64 string\n    return Buffer.from(data, 'base64').toString('utf-8');\n  };\n\n  // Recursive function to find and extract the text/plain content from parts\n  const extractPlainText = (parts: any[]): string => {\n    for (const part of parts) {\n      // If part is a multipart, recurse through its parts\n      if (part.mimeType && part.mimeType.startsWith('multipart')) {\n        if (part.parts && Array.isArray(part.parts)) {\n          return extractPlainText(part.parts); // Recurse through nested parts\n        }\n      }\n\n      // Check for text/plain part\n      if (part.mimeType === 'text/plain' && part.body?.data) {\n        return decodeBase64Url(part.body.data);\n      }\n    }\n    return 'No text/plain content found';\n  };\n\n  const { payload } = inputs;\n\n  // If payload has parts, recursively extract the plain text\n  const decodedContent = payload.parts ? extractPlainText(payload.parts) : 'No parts found';\n\n  console.log(\"Decoded Content:\", decodedContent);\n  return decodedContent;\n};",
+                                            "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                                          },
+                                          "inputUiInfo": {},
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "name": "step_19",
+                                          "type": "PIECE",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "key": "gmails",
+                                              "value": "{{step_18}}",
+                                              "store_scope": "COLLECTION"
+                                            },
+                                            "pieceName": "@activepieces/piece-store",
+                                            "pieceType": "OFFICIAL",
+                                            "actionName": "append",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "pieceVersion": "~0.5.4",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "displayName": "Append"
+                                        },
+                                        "displayName": "Extract message content"
+                                      },
+                                      "displayName": "Get message content"
+                                    }
+                                  },
+                                  "displayName": "Remove"
+                                },
+                                "displayName": "Extract Messages ID's"
+                              },
+                              "displayName": "Get messagesID's"
+                            },
+                            "displayName": "Loop on Items",
+                            "firstLoopAction": {
+                              "name": "step_15",
+                              "type": "PIECE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "url": {
+                                    "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from:﻿{{step_25['item']['email']}}"
+                                  },
+                                  "auth": "{{connections['gmail-VIKAS-BISHNOI']}}",
+                                  "method": "GET",
+                                  "headers": {},
+                                  "failsafe": false,
+                                  "queryParams": {}
+                                },
+                                "pieceName": "@activepieces/piece-gmail",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "custom_api_call",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "pieceVersion": "~0.7.2",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "name": "step_27",
+                                "type": "PIECE",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "key": "messageId",
+                                    "value": "{{step_15['body']['messages']}}",
+                                    "store_scope": "COLLECTION",
+                                    "ignore_if_exists": false
+                                  },
+                                  "pieceName": "@activepieces/piece-store",
+                                  "pieceType": "OFFICIAL",
+                                  "actionName": "add_to_list",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "pieceVersion": "~0.5.4",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "displayName": "Add To List"
+                              },
+                              "displayName": "Get Messages History"
+                            }
+                          },
+                          "displayName": "Remove"
+                        },
+                        "displayName": "Get"
+                      },
+                      "displayName": "Branch"
+                    },
+                    "displayName": "Check all users Domain name"
+                  },
+                  "displayName": "Json"
+                },
+                "displayName": "Check Domain name"
+              },
+              "displayName": "Format User Info"
+            },
+            "displayName": "Extract User Data"
+          },
+          "displayName": "Code"
+        },
+        "displayName": "Get all Events"
+      }
+    },
+    "valid": true,
+    "schemaVersion": "1"
+  },
+  "blogUrl": ""
+}

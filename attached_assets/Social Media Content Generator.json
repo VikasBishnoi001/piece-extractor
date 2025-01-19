@@ -1,0 +1,162 @@
+{
+  "created": "1729157633186",
+  "updated": "1729157633186",
+  "name": "Social Media Content Generator",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-inputs",
+    "@activepieces/piece-zbrain-ai"
+  ],
+  "blogUrl": "",
+  "template": {
+    "displayName": "Social Media Content Generator",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Webhook Trigger",
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "input": "LeewayHertz Brand Guidelines\n1. Brand Overview\nLeewayHertz is an award-winning AI consulting and development company, serving startups, scale-ups, and enterprises with custom AI-driven platforms and applications. The brand embodies technological innovation, collaboration, and delivering forward-thinking solutions to redefine operations and create value for clients.\n2. Brand Mission\nTo help businesses harness the transformative power of AI and unlock new opportunities by delivering cutting-edge, end-to-end AI solutions tailored to their specific needs.\n3. Core Values\nInnovation: Constantly pushing the boundaries of what's possible through AI and emerging technologies.\nCollaboration: Working closely with clients to understand their challenges and deliver personalized solutions.\nImpact: Developing solutions that create tangible, transformative results.\nIntegrity: Building trust by consistently delivering high-quality, reliable services.\n4. Target Audience\nLeewayHertz primarily targets:\nTech-Savvy Startups and Entrepreneurs\nGrowing Scale-ups\nLarge Enterprises\nThe audience is forward-looking, keen on adopting AI and cutting-edge tech solutions to stay ahead in their industry.\n5. Tone of Voice\nThe tone used by LeewayHertz is professional yet approachable. Communication should reflect the company’s expertise in AI, but remain clear and understandable for all stakeholders, including those less familiar with AI technology. Messages should be:\nConfident and Authoritative: Demonstrating knowledge and leadership in AI.\nInnovative: Showcasing the latest advancements and future-oriented strategies.\nCollaborative: Conveying the partnership and customization of services based on client needs.\nOptimistic: Highlighting the positive impact of AI on business growth and efficiency.\n6. Logo Usage\nThe LeewayHertz logo should always be displayed in a way that preserves its clarity and impact. This includes:\nUsing a high-resolution version of the logo.\nMaintaining ample white space around the logo.\nConsistent placement, usually in the corner of the image (as seen in the provided images).\nNo distortion, color alteration, or modification to the logo.\n7. Color Palette\nThe color scheme used across LeewayHertz's visuals includes a deep navy blue as the primary color, alongside bright accent colors that vary based on the use case (as seen in the different AI agent visuals). These colors convey professionalism, trust, and the cutting-edge nature of the brand:\nPrimary Color: Deep Navy Blue (#0b1533)\nSecondary Colors:\nBright Blue (#3f9fff)\nLight Purple (#8f77f2)\nSoft Gray (#f3f4f5)\nUse accent colors like neon blue and purple sparingly to highlight key elements, especially in AI and technology-focused materials.\n8. Typography\nLeewayHertz’s typography should maintain a balance between readability and modernity. Use sans-serif fonts for clarity and a contemporary feel:\nPrimary Font: Helvetica or Arial for digital materials (clear and clean).\nSecondary Font: Open Sans or similar, for body text in larger documents.\nFont Style: Use bold for headers to emphasize strength, and regular for body text to ensure readability.\n9. Visual Elements and Imagery\nLeewayHertz visual content is tech-focused, emphasizing AI’s role in transforming business operations. Some key elements include:\nIllustrations and Icons: Use clean, modern illustrations representing technology, innovation, and AI.\nImages: Showcase AI, data processing, futuristic tech settings, and collaborative environments.\nText Overlays: Frequently use white or light-colored text against darker backgrounds for contrast (as seen in the LinkedIn images).\nGraphics:\nUse futuristic and clean elements like digital interfaces, charts, and icons that emphasize data processing and AI technologies.\nImages of technology professionals interacting with screens or data.\nGraphics should have a professional, yet creative style, incorporating AI-related visuals.\n10. Content Structure\nLeewayHertz structures its content in a modular format, emphasizing clarity and function. For example:\nHeadlines: Bold, impactful, stating the AI solution being provided.\nSubheadings: Short but informative, explaining the value of the AI service.\nCallouts: Include the benefits of AI, driving innovation, and operational efficiency.\nCalls-to-Action: Should be clear, motivating the user to explore more, book a consultation, or contact the team for custom solutions.\n11. Social Media Guidelines\nUse consistent branding across all platforms.\nMaintain a focus on AI, innovation, and business solutions in posts, as seen in LeewayHertz's current LinkedIn presence.\nPosts should be visually engaging with a combination of tech-focused imagery, infographics, and data visualization.\nMaintain hashtags that reflect the core of the business (#AI, #Innovation, #GenAI, #TechSolutions).\n12. Tone for Social Media\nOn social media, the tone is slightly more relaxed but still professional and insightful. Highlight success stories, project updates, and breakthroughs in AI technology that engage the target audience. Use conversational language when engaging with comments or inquiries."
+          },
+          "pieceName": "@activepieces/piece-inputs",
+          "pieceType": "CUSTOM",
+          "actionName": "long_text",
+          "inputUiInfo": {},
+          "packageType": "ARCHIVE",
+          "pieceVersion": "0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_4",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "input": "As artificial intelligence models become increasingly prevalent and are integrated into diverse sectors like health care, finance, education, transportation, and entertainment, understanding how they work under the hood is critical. Interpreting the mechanisms underlying AI models enables us to audit them for safety and biases, with the potential to deepen our understanding of the science behind intelligence itself.\nImagine if we could directly investigate the human brain by manipulating each of its individual neurons to examine their roles in perceiving a particular object. While such an experiment would be prohibitively invasive in the human brain, it is more feasible in another type of neural network: one that is artificial. However, somewhat similar to the human brain, artificial models containing millions of neurons are too large and complex to study by hand, making interpretability at scale a very challenging task. \nTo address this, MIT Computer Science and Artificial Intelligence Laboratory (CSAIL) researchers decided to take an automated approach to interpreting artificial vision models that evaluate different properties of images. They developed “MAIA” (Multimodal Automated Interpretability Agent), a system that automates a variety of neural network interpretability tasks using a vision-language model backbone equipped with tools for experimenting on other AI systems.\n“Our goal is to create an AI researcher that can conduct interpretability experiments autonomously. Existing automated interpretability methods merely label or visualize data in a one-shot process. On the other hand, MAIA can generate hypotheses, design experiments to test them, and refine its understanding through iterative analysis,” says Tamar Rott Shaham, an MIT electrical engineering and computer science (EECS) postdoc at CSAIL and co-author on a new paper about the research. “By combining a pre-trained vision-language model with a library of interpretability tools, our multimodal method can respond to user queries by composing and running targeted experiments on specific models, continuously refining its approach until it can provide a comprehensive answer.”\nThe automated agent is demonstrated to tackle three key tasks: It labels individual components inside vision models and describes the visual concepts that activate them, it cleans up image classifiers by removing irrelevant features to make them more robust to new situations, and it hunts for hidden biases in AI systems to help uncover potential fairness issues in their outputs. “But a key advantage of a system like MAIA is its flexibility,” says Sarah Schwettmann PhD ’21, a research scientist at CSAIL and co-lead of the research. “We demonstrated MAIA’s usefulness on a few specific tasks, but given that the system is built from a foundation model with broad reasoning capabilities, it can answer many different types of interpretability queries from users, and design experiments on the fly to investigate them.” \nNeuron by neuron\nIn one example task, a human user asks MAIA to describe the concepts that a particular neuron inside a vision model is responsible for detecting. To investigate this question, MAIA first uses a tool that retrieves “dataset exemplars” from the ImageNet dataset, which maximally activate the neuron. For this example neuron, those images show people in formal attire, and closeups of their chins and necks. MAIA makes various hypotheses for what drives the neuron’s activity: facial expressions, chins, or neckties. MAIA then uses its tools to design experiments to test each hypothesis individually by generating and editing synthetic images — in one experiment, adding a bow tie to an image of a human face increases the neuron’s response. “This approach allows us to determine the specific cause of the neuron’s activity, much like a real scientific experiment,” says Rott Shaham.\nMAIA’s explanations of neuron behaviors are evaluated in two key ways. First, synthetic systems with known ground-truth behaviors are used to assess the accuracy of MAIA’s interpretations. Second, for “real” neurons inside trained AI systems with no ground-truth descriptions, the authors design a new automated evaluation protocol that measures how well MAIA’s descriptions predict neuron behavior on unseen data.\nThe CSAIL-led method outperformed baseline methods describing individual neurons in a variety of vision models such as ResNet, CLIP, and the vision transformer DINO. MAIA also performed well on the new dataset of synthetic neurons with known ground-truth descriptions. For both the real and synthetic systems, the descriptions were often on par with descriptions written by human experts.\nHow are descriptions of AI system components, like individual neurons, useful? “Understanding and localizing behaviors inside large AI systems is a key part of auditing these systems for safety before they’re deployed — in some of our experiments, we show how MAIA can be used to find neurons with unwanted behaviors and remove these behaviors from a model,” says Schwettmann. “We’re building toward a more resilient AI ecosystem where tools for understanding and monitoring AI systems keep pace with system scaling, enabling us to investigate and hopefully understand unforeseen challenges introduced by new models.”\n\nPeeking inside neural networks\nThe nascent field of interpretability is maturing into a distinct research area alongside the rise of “black box” machine learning models. How can researchers crack open these models and understand how they work?\n\nCurrent methods for peeking inside tend to be limited either in scale or in the precision of the explanations they can produce. Moreover, existing methods tend to fit a particular model and a specific task. This caused the researchers to ask: How can we build a generic system to help users answer interpretability questions about AI models while combining the flexibility of human experimentation with the scalability of automated techniques?\nOne critical area they wanted this system to address was bias. To determine whether image classifiers displayed bias against particular subcategories of images, the team looked at the final layer of the classification stream (in a system designed to sort or label items, much like a machine that identifies whether a photo is of a dog, cat, or bird) and the probability scores of input images (confidence levels that the machine assigns to its guesses). To understand potential biases in image classification, MAIA was asked to find a subset of images in specific classes (for example “labrador retriever”) that were likely to be incorrectly labeled by the system. In this example, MAIA found that images of black labradors were likely to be misclassified, suggesting a bias in the model toward yellow-furred retrievers.\nSince MAIA relies on external tools to design experiments, its performance is limited by the quality of those tools. But, as the quality of tools like image synthesis models improve, so will MAIA. MAIA also shows confirmation bias at times, where it sometimes incorrectly confirms its initial hypothesis. To mitigate this, the researchers built an image-to-text tool, which uses a different instance of the language model to summarize experimental results. Another failure mode is overfitting to a particular experiment, where the model sometimes makes premature conclusions based on minimal evidence.\n“I think a natural next step for our lab is to move beyond artificial systems and apply similar experiments to human perception,” says Rott Shaham. “Testing this has traditionally required manually designing and testing stimuli, which is labor-intensive. With our agent, we can scale up this process, designing and testing numerous stimuli simultaneously. This might also allow us to compare human visual perception with artificial systems.”\n“Understanding neural networks is difficult for humans because they have hundreds of thousands of neurons, each with complex behavior patterns. MAIA helps to bridge this by developing AI agents that can automatically analyze these neurons and report distilled findings back to humans in a digestible way,” says Jacob Steinhardt, assistant professor at the University of California at Berkeley, who wasn’t involved in the research. “Scaling these methods up could be one of the most important routes to understanding and safely overseeing AI systems.”\nRott Shaham and Schwettmann are joined by five fellow CSAIL affiliates on the paper: undergraduate student Franklin Wang; incoming MIT student Achyuta Rajaram; EECS PhD student Evan Hernandez SM ’22; and EECS professors Jacob Andreas and Antonio Torralba. Their work was supported, in part, by the MIT-IBM Watson AI Lab, Open Philanthropy, Hyundai Motor Co., the Army Research Laboratory, Intel, the National Science Foundation, the Zuckerman STEM Leadership Program, and the Viterbi Fellowship. The researchers’ findings will be presented at the International Conference on Machine Learning this week."
+            },
+            "pieceName": "@activepieces/piece-inputs",
+            "pieceType": "CUSTOM",
+            "actionName": "long_text",
+            "inputUiInfo": {},
+            "packageType": "ARCHIVE",
+            "pieceVersion": "0.0.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_3",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "input": "You are an AI-powered social media content generator tasked with creating tailored posts for three platforms: LinkedIn, Facebook, and Twitter. If brand guidelines are provided, ensure that the content aligns with them in terms of tone, style, and messaging.\nInstructions:\nLinkedIn (Professional Tone): Write a professional and informative post that resonates with industry professionals. Focus on key insights, business takeaways, or thought leadership. Include a clear call to action and use 10-12 relevant hashtags for visibility.\nFacebook (Conversational Tone): Craft an engaging and conversational post that fosters interaction with the community. Ensure it reflects the brand’s voice, using a friendly and approachable tone. Include a prompt or question to encourage comments, and use 3-5 hashtags for reach.\nTwitter (Concise but Engaging): Write a tweet that captures the core message in a concise yet impactful way, making full use of the 280-character limit. Ensure the tweet is punchy, includes a clear message, and maintains the brand’s tone. Incorporate 3-5 relevant hashtags and, where possible, include a call to action (e.g., link to content or encourage engagement).\nFormatting:\nEach post should be customized to suit the specific platform’s audience, with attention to any provided brand guidelines.\nOutput Example Format:\nLinkedIn: [Your post]\nFacebook: [Your post]\nTwitter: [Your post]"
+              },
+              "pieceName": "@activepieces/piece-inputs",
+              "pieceType": "CUSTOM",
+              "actionName": "long_text",
+              "inputUiInfo": {},
+              "packageType": "ARCHIVE",
+              "pieceVersion": "0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_2",
+              "type": "PIECE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "auth": "{{connections['zbrain-ai']}}",
+                  "model": "gpt-4o",
+                  "messages": [
+                    {
+                      "role": "system",
+                      "content": "{{step_3}}"
+                    },
+                    {
+                      "role": "user",
+                      "content": "Brand Guidlines - {{step_1}}.\n Content - {{step_4}}"
+                    }
+                  ],
+                  "maxTokens": "4096",
+                  "temperature": "0.7"
+                },
+                "pieceName": "@activepieces/piece-zbrain-ai",
+                "pieceType": "CUSTOM",
+                "actionName": "models",
+                "inputUiInfo": {},
+                "packageType": "ARCHIVE",
+                "pieceVersion": "0.0.4",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_5",
+                "type": "CODE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "jsonData": "{{step_2['content']}}"
+                  },
+                  "sourceCode": {
+                    "code": "export const code = async (inputs) => {\n  return inputs.jsonData;\n};",
+                    "packageJson": "\n      {\n        \"dependencies\": {\n        }\n      }"
+                  },
+                  "inputUiInfo": {},
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "displayName": "Code"
+              },
+              "displayName": "Models"
+            },
+            "displayName": "Prompt"
+          },
+          "displayName": "Input (content/article)"
+        },
+        "displayName": "Variable: Brand Guidlines"
+      },
+      "type": "WEBHOOK",
+      "settings": {
+        "inputUiInfo": {}
+      }
+    },
+    "valid": true
+  }
+}
