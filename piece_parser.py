@@ -71,12 +71,10 @@ class PieceParser:
             return None
 
         error_handling = ErrorHandlingOptions()
-        if 'error_handling' in example_data:
-            error_opts = example_data['error_handling']
+        if 'errorHandlingOptions' in example_data:
+            error_opts = example_data['errorHandlingOptions']
             error_handling.retry_on_failure = error_opts.get('retryOnFailure', {}).get('value', False)
             error_handling.continue_on_failure = error_opts.get('continueOnFailure', {}).get('value', False)
-            error_handling.max_retries = error_opts.get('maxRetries')
-            error_handling.retry_interval = error_opts.get('retryInterval')
 
         return StepSettings(
             piece_name=example_data.get('pieceName', ''),
@@ -93,6 +91,7 @@ class PieceParser:
         if not prop_content:
             return None
 
+        # Extract basic property info
         display_name = extract_value_by_key(prop_content, "displayName")
         description = extract_value_by_key(prop_content, "description")
         required = "required: true" in prop_content.lower()
@@ -109,7 +108,7 @@ class PieceParser:
         validation_rules = self.extract_validation_rules(prop_content)
         default_value = self.extract_default_value(prop_content)
 
-        # Extract UI info if present
+        # Extract UI info
         ui_info_match = re.search(r'inputUiInfo:\s*({[^}]+})', prop_content)
         input_ui_info = None
         if ui_info_match:
@@ -119,9 +118,9 @@ class PieceParser:
             except:
                 pass
 
-        # Extract package type if present
+        # Extract package type
         package_type_match = re.search(r'packageType:\s*[\'"]([^\'"]+)[\'"]', prop_content)
-        package_type = package_type_match.group(1) if package_type_match else None
+        package_type = package_type_match.group(1) if package_type_match else 'REGISTRY'
 
         return Property(
             name=prop_name,
@@ -153,10 +152,6 @@ class PieceParser:
         display_name = extract_value_by_key(component_def, "displayName")
         description = extract_value_by_key(component_def, "description")
 
-        # Extract version information if available
-        version_match = re.search(r'pieceVersion:\s*[\'"]([^\'"]+)[\'"]', component_def)
-        piece_version = version_match.group(1) if version_match else None
-
         # Extract properties
         props_start = component_def.find("props:")
         properties = []
@@ -187,10 +182,10 @@ class PieceParser:
                     if prop:
                         properties.append(prop)
 
-        # Extract trigger type for triggers
-        trigger_type = None
+        # Extract trigger type and ensure it's always a string
+        trigger_type = "PIECE_TRIGGER"  # Default type
         if component_type == "Trigger":
-            type_match = re.search(r'type:\s*(\w+)', component_def)
+            type_match = re.search(r'type:\s*TriggerStrategy\.(\w+)', component_def)
             if type_match:
                 trigger_type = type_match.group(1)
 
@@ -200,8 +195,8 @@ class PieceParser:
             display_name=clean_typescript_string(display_name),
             description=clean_typescript_string(description),
             properties=properties,
-            piece_version=piece_version,
-            settings_template=None,  # Will be populated later from flow examples
+            piece_version="0.0.1",  # Default version
+            settings_template=None,  # Will be populated from flow examples
             trigger_type=trigger_type if component_type == "Trigger" else None,
             valid=True
         )
@@ -231,18 +226,8 @@ class PieceParser:
 
         display_name = extract_value_by_key(piece_def, "displayName")
         description = extract_value_by_key(piece_def, "description")
-        min_release = extract_value_by_key(piece_def, "minimumSupportedRelease")
         logo_url = extract_value_by_key(piece_def, "logoUrl")
-
-        # Extract authors array
-        authors_match = re.search(r'authors:\s*\[(.*?)\]', piece_def)
-        authors = []
-        if authors_match:
-            authors_str = authors_match.group(1)
-            authors = [
-                clean_typescript_string(a.strip())
-                for a in re.findall(r'["\']([^"\']+)["\']', authors_str)
-            ]
+        min_release = extract_value_by_key(piece_def, "minimumSupportedRelease") or "0.0.1"  # Default version
 
         # Extract categories if present
         categories_match = re.search(r'categories:\s*\[(.*?)\]', piece_def)
@@ -254,7 +239,7 @@ class PieceParser:
                 for c in re.findall(r'["\']([^"\']+)["\']', categories_str)
             ]
 
-        # Extract auth type and settings
+        # Extract auth type
         auth_type = None
         if "PieceAuth." in piece_def:
             auth_match = re.search(r'PieceAuth\.(\w+)', piece_def)
@@ -281,7 +266,6 @@ class PieceParser:
             logo_url=clean_typescript_string(logo_url),
             actions=[],
             triggers=[],
-            authors=authors,
             categories=categories,
             auth_type=auth_type,
             package_type=package_type,
