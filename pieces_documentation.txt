@@ -1,0 +1,24 @@
+# Test Piece
+
+A test piece to verify documentation generator
+
+Minimum Supported Release: 0.5.0
+Authors: testauthor
+
+## Available Actions
+
+### Test Action
+A test action with various property types
+
+#### Parameters:
+- **Text Input** (Required)
+  - Type: Text
+  - Description: A simple text input field
+
+- **Number Input** (Optional)
+  - Type: Number
+  - Description: A numeric input field
+
+- **Enable Feature** (Optional)
+  - Type: Boolean
+  - Description: Toggle this feature on/off
