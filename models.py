@@ -15,10 +15,10 @@ class Property:
     description: str
     required: bool
     property_type: str
-    input_ui_info: Optional[Dict] = None  # Store UI-specific information
-    default_value: Optional[Any] = None   # Store default values if specified
-    validation_rules: Optional[Dict] = None  # Store any validation rules
-    package_type: Optional[str] = None    # REGISTRY or ARCHIVE
+    input_ui_info: Optional[Dict] = None
+    default_value: Optional[Any] = None
+    validation_rules: Optional[Dict] = None
+    package_type: Optional[str] = None
 
 @dataclass
 class StepSettings:
@@ -27,23 +27,11 @@ class StepSettings:
     action_name: str
     input: Dict[str, Any]
     input_ui_info: Dict[str, Any]
-    package_type: str  # REGISTRY or ARCHIVE
+    package_type: str
     error_handling: ErrorHandlingOptions
 
 @dataclass
-class Action:
-    name: str
-    display_name: str
-    description: str
-    properties: List[Property]
-    piece_name: Optional[str] = None  # The name of the piece this action belongs to
-    piece_version: Optional[str] = None  # Version information
-    settings_template: Optional[StepSettings] = None  # Example settings from flows
-    valid: bool = True
-    error_handling: Optional[ErrorHandlingOptions] = None
-
-@dataclass
-class Trigger:
+class BaseComponent:
     name: str
     display_name: str
     description: str
@@ -51,8 +39,17 @@ class Trigger:
     piece_name: Optional[str] = None
     piece_version: Optional[str] = None
     settings_template: Optional[StepSettings] = None
-    trigger_type: str = "PIECE_TRIGGER"  # or WEBHOOK, etc.
     valid: bool = True
+    error_handling: Optional[ErrorHandlingOptions] = None
+    trigger_type: Optional[str] = None
+
+@dataclass
+class Action(BaseComponent):
+    pass
+
+@dataclass
+class Trigger(BaseComponent):
+    trigger_type: str = "PIECE_TRIGGER"
 
 @dataclass
 class Piece:
@@ -61,10 +58,10 @@ class Piece:
     description: str
     minimum_supported_release: str
     logo_url: str
-    actions: List[Action]
-    triggers: List[Trigger]
-    authors: List[str]
-    categories: List[str] = field(default_factory=list)  # Initialize as empty list
-    auth_type: Optional[str] = None  # Store authentication type information
-    package_type: str = "REGISTRY"  # REGISTRY or ARCHIVE
-    piece_type: str = "OFFICIAL"   # OFFICIAL or CUSTOM
+    actions: List[Action] = field(default_factory=list)
+    triggers: List[Trigger] = field(default_factory=list)
+    authors: List[str] = field(default_factory=list)
+    categories: List[str] = field(default_factory=list)
+    auth_type: Optional[str] = None
+    package_type: str = "REGISTRY"
+    piece_type: str = "OFFICIAL"

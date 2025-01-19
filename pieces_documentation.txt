@@ -2,265 +2,111 @@
 
 Powerful AI tools from Microsoft
 
+## Actions
+
+### Ask GPT
+
+The maximum number of tokens to generate. Requests can use up to 2,048 or 4,096 tokens shared between prompt and completion depending on the model. Don't set the value to maximum and leave some tokens for the input. (One token is roughly 4 characters for normal English text
+
+#### Input Parameters
+- **deploymentId**: `Text`
+  The name of your model deployment.
+
+- **prompt**: `Text`
+
+- **temperature**: `Number`
+  Controls randomness: Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive.
+
+- **maxTokens**: `Number`
+  The maximum number of tokens to generate. Requests can use up to 2,048 or 4,096 tokens shared between prompt and completion depending on the model. Don't set the value to maximum and leave some tokens for the input. (One token is roughly 4 characters for normal English text
+
+- **topP**: `Number`
+  An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+
+- **frequencyPenalty**: `Number`
+  Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+
+- **presencePenalty**: `Number`
+  Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the mode's likelihood to talk about new topics.
+
+- **memoryKey**: `Text`
+  A memory key that will keep the chat history shared across runs and flows. Keep it empty to leave ChatGPT without memory of previous messages.
+
+- **roles**: `JSON`
+  Array of roles to specify more accurate response
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "azure-openai",
+    "actionName": "ask_gpt",
+    "input": {
+      "deploymentId": "{previousStep.output_field}"
+      "prompt": "{previousStep.output_field}"
+      "temperature": "{previousStep.output_field}"
+      "maxTokens": "{previousStep.output_field}"
+      "topP": "{previousStep.output_field}"
+      "frequencyPenalty": "{previousStep.output_field}"
+      "presencePenalty": "{previousStep.output_field}"
+      "memoryKey": "{previousStep.output_field}"
+      "roles": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
 ---
 
-## Flow Structure Example
-
-### Flow Metadata
-```json
-{
-  "name": "Vendor Data Validation Agent",
-  "description": "",
-  "tags": [
-  ],
-  "pieces": [
-    "@activepieces/piece-webhook",
-    "@activepieces/piece-inputs",
-    "@activepieces/piece-google-drive",
-    "@activepieces/piece-zbrain-ai",
-    "@activepieces/piece-http",
-    "@activepieces/piece-store",
-    "@activepieces/piece-utilities",
-  ],
-  "template": {
-    "displayName": "Vendor Data Validation Agent"
-  }
-}
-```
-
-### Flow Overview
-This flow demonstrates the following sequence:
-1. Starts with a webhook trigger
-2. Executes @activepieces/piece-inputs piece with action 'long_text'
-3. Executes @activepieces/piece-store piece with action 'remove_value'
-4. Executes @activepieces/piece-utilities piece with action 'tokenizer'
-6. Executes @activepieces/piece-store piece with action 'remove_value'
-
-### Complete Flow Configuration
-```json
-{
-  "trigger": {
-    "type": "WEBHOOK",
-    "settings": {},
-    "nextAction": {
-        "name": "step_1",
-        "type": "PIECE",
-        "settings": {
-          "pieceName": "@activepieces/piece-inputs",
-          "actionName": "long_text",
-          "packageType": "ARCHIVE",
-          "pieceType": "CUSTOM",
-          "errorHandlingOptions": {
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-          },
-          "input": {
-            "input": "{{trigger.body.file.content}}",
-          }
-        }
-        ,"nextAction": {
-            "name": "step_3",
-            "type": "PIECE",
-            "settings": {
-              "pieceName": "@activepieces/piece-store",
-              "actionName": "remove_value",
-              "packageType": "REGISTRY",
-              "pieceType": "OFFICIAL",
-              "errorHandlingOptions": {
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-              },
-            }
-            ,"nextAction": {
-                "name": "step_6",
-                "type": "PIECE",
-                "settings": {
-                  "pieceName": "@activepieces/piece-utilities",
-                  "actionName": "tokenizer",
-                  "packageType": "ARCHIVE",
-                  "pieceType": "CUSTOM",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                  },
-                  "input": {
-                    "text": "{{step_1}}",
-                  }
-                }
-                ,"nextAction": {
-                    "name": "step_14",
-                    "type": "PIECE",
-                    "settings": {
-                      "pieceName": "@activepieces/piece-store",
-                      "actionName": "remove_value",
-                      "packageType": "REGISTRY",
-                      "pieceType": "OFFICIAL",
-                      "errorHandlingOptions": {
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                      },
-                    }
-                    }
-    }
-    }
-    }
-    }
-  }
-}
-```
-
-### Variable References
-The following variables are passed between steps:
-
-**Step `step_1`**
-- Uses `{{trigger.body.file.content}}` for input `input`
-
-**Step `step_6`**
-- Uses `{{step_1}}` for input `text`
-
-
-
-This piece has no actions or triggers available.
 
 
 
 # Confluence
+## Actions
+
+### Get Page Content
+
+Confluence Cloud REST API v2
+
+#### Input Parameters
+- **pageId**: `Text`
+  Get this from the page URL of your Confluence Cloud
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "confluence",
+    "actionName": "getPageContent",
+    "input": {
+      "pageId": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
 
 ---
 
-## Flow Structure Example
-
-### Flow Metadata
-```json
-{
-  "name": "Vendor Data Validation Agent",
-  "description": "",
-  "tags": [
-  ],
-  "pieces": [
-    "@activepieces/piece-webhook",
-    "@activepieces/piece-inputs",
-    "@activepieces/piece-google-drive",
-    "@activepieces/piece-zbrain-ai",
-    "@activepieces/piece-http",
-    "@activepieces/piece-store",
-    "@activepieces/piece-utilities",
-  ],
-  "template": {
-    "displayName": "Vendor Data Validation Agent"
-  }
-}
-```
-
-### Flow Overview
-This flow demonstrates the following sequence:
-1. Starts with a webhook trigger
-2. Executes @activepieces/piece-inputs piece with action 'long_text'
-3. Executes @activepieces/piece-store piece with action 'remove_value'
-4. Executes @activepieces/piece-utilities piece with action 'tokenizer'
-6. Executes @activepieces/piece-store piece with action 'remove_value'
-
-### Complete Flow Configuration
-```json
-{
-  "trigger": {
-    "type": "WEBHOOK",
-    "settings": {},
-    "nextAction": {
-        "name": "step_1",
-        "type": "PIECE",
-        "settings": {
-          "pieceName": "@activepieces/piece-inputs",
-          "actionName": "long_text",
-          "packageType": "ARCHIVE",
-          "pieceType": "CUSTOM",
-          "errorHandlingOptions": {
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-          },
-          "input": {
-            "input": "{{trigger.body.file.content}}",
-          }
-        }
-        ,"nextAction": {
-            "name": "step_3",
-            "type": "PIECE",
-            "settings": {
-              "pieceName": "@activepieces/piece-store",
-              "actionName": "remove_value",
-              "packageType": "REGISTRY",
-              "pieceType": "OFFICIAL",
-              "errorHandlingOptions": {
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-              },
-            }
-            ,"nextAction": {
-                "name": "step_6",
-                "type": "PIECE",
-                "settings": {
-                  "pieceName": "@activepieces/piece-utilities",
-                  "actionName": "tokenizer",
-                  "packageType": "ARCHIVE",
-                  "pieceType": "CUSTOM",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                  },
-                  "input": {
-                    "text": "{{step_1}}",
-                  }
-                }
-                ,"nextAction": {
-                    "name": "step_14",
-                    "type": "PIECE",
-                    "settings": {
-                      "pieceName": "@activepieces/piece-store",
-                      "actionName": "remove_value",
-                      "packageType": "REGISTRY",
-                      "pieceType": "OFFICIAL",
-                      "errorHandlingOptions": {
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                      },
-                    }
-                    }
-    }
-    }
-    }
-    }
-  }
-}
-```
-
-### Variable References
-The following variables are passed between steps:
-
-**Step `step_1`**
-- Uses `{{trigger.body.file.content}}` for input `input`
-
-**Step `step_6`**
-- Uses `{{step_1}}` for input `text`
-
-
-
-This piece has no actions or triggers available.
 
 
 
@@ -268,133 +114,539 @@ This piece has no actions or triggers available.
 
 Cloud storage and file synchronization
 
+## Actions
+
+### Copy folder
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+
+#### Input Parameters
+- **from_path**: `Text`
+  The source path of the folder (e.g. /folder1/sourceFolder
+
+- **to_path**: `Text`
+  The destination path for the copied folder (e.g. /folder2/destinationFolder
+
+- **autorename**: `Boolean`
+  If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+
+- **allow_ownership_transfer**: `Boolean`
+  Allows copy by owner even if it would result in an ownership transfer.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "copy_dropbox_folder",
+    "input": {
+      "from_path": "{previousStep.output_field}"
+      "to_path": "{previousStep.output_field}"
+      "autorename": "{previousStep.output_field}"
+      "allow_ownership_transfer": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
 ---
 
-## Flow Structure Example
 
-### Flow Metadata
+### Create New Folder
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
+#### Input Parameters
+- **path**: `Text`
+  The path of the new folder e.g. /Homework/math
+
+- **autorename**: `Boolean`
+  If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
 ```json
 {
-  "name": "Vendor Data Validation Agent",
-  "description": "",
-  "tags": [
-  ],
-  "pieces": [
-    "@activepieces/piece-webhook",
-    "@activepieces/piece-inputs",
-    "@activepieces/piece-google-drive",
-    "@activepieces/piece-zbrain-ai",
-    "@activepieces/piece-http",
-    "@activepieces/piece-store",
-    "@activepieces/piece-utilities",
-  ],
-  "template": {
-    "displayName": "Vendor Data Validation Agent"
-  }
-}
-```
-
-### Flow Overview
-This flow demonstrates the following sequence:
-1. Starts with a webhook trigger
-2. Executes @activepieces/piece-inputs piece with action 'long_text'
-3. Executes @activepieces/piece-store piece with action 'remove_value'
-4. Executes @activepieces/piece-utilities piece with action 'tokenizer'
-6. Executes @activepieces/piece-store piece with action 'remove_value'
-
-### Complete Flow Configuration
-```json
-{
-  "trigger": {
-    "type": "WEBHOOK",
-    "settings": {},
-    "nextAction": {
-        "name": "step_1",
-        "type": "PIECE",
-        "settings": {
-          "pieceName": "@activepieces/piece-inputs",
-          "actionName": "long_text",
-          "packageType": "ARCHIVE",
-          "pieceType": "CUSTOM",
-          "errorHandlingOptions": {
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-          },
-          "input": {
-            "input": "{{trigger.body.file.content}}",
-          }
-        }
-        ,"nextAction": {
-            "name": "step_3",
-            "type": "PIECE",
-            "settings": {
-              "pieceName": "@activepieces/piece-store",
-              "actionName": "remove_value",
-              "packageType": "REGISTRY",
-              "pieceType": "OFFICIAL",
-              "errorHandlingOptions": {
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-              },
-            }
-            ,"nextAction": {
-                "name": "step_6",
-                "type": "PIECE",
-                "settings": {
-                  "pieceName": "@activepieces/piece-utilities",
-                  "actionName": "tokenizer",
-                  "packageType": "ARCHIVE",
-                  "pieceType": "CUSTOM",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                  },
-                  "input": {
-                    "text": "{{step_1}}",
-                  }
-                }
-                ,"nextAction": {
-                    "name": "step_14",
-                    "type": "PIECE",
-                    "settings": {
-                      "pieceName": "@activepieces/piece-store",
-                      "actionName": "remove_value",
-                      "packageType": "REGISTRY",
-                      "pieceType": "OFFICIAL",
-                      "errorHandlingOptions": {
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                      },
-                    }
-                    }
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "create_new_dropbox_folder",
+    "input": {
+      "path": "{previousStep.output_field}"
+      "autorename": "{previousStep.output_field}"
     }
-    }
-    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
     }
   }
 }
 ```
 
-### Variable References
-The following variables are passed between steps:
-
-**Step `step_1`**
-- Uses `{{trigger.body.file.content}}` for input `input`
-
-**Step `step_6`**
-- Uses `{{step_1}}` for input `text`
+---
 
 
+### Move file
 
-This piece has no actions or triggers available.
+If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+
+#### Input Parameters
+- **from_path**: `Text`
+  The current path of the file (e.g. /folder1/oldfile.txt
+
+- **to_path**: `Text`
+  The new path for the file (e.g. /folder2/newfile.txt
+
+- **autorename**: `Boolean`
+  If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+
+- **allow_ownership_transfer**: `Boolean`
+  Allows moves by owner even if it would result in an ownership transfer.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "move_dropbox_file",
+    "input": {
+      "from_path": "{previousStep.output_field}"
+      "to_path": "{previousStep.output_field}"
+      "autorename": "{previousStep.output_field}"
+      "allow_ownership_transfer": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Upload file
+
+If there's a conflict, as determined by mode, have the Dropbox server try to autorename the file to avoid conflict.
+
+#### Input Parameters
+- **path**: `Text`
+  The path where the file should be saved (e.g. /folder1/file.txt
+
+- **file**: `File`
+  The file URL or base64 to upload
+
+- **autorename**: `Boolean`
+  If there's a conflict, as determined by mode, have the Dropbox server try to autorename the file to avoid conflict.
+
+- **mute**: `Boolean`
+  Normally, users are made aware of any file modifications in their Dropbox account via notifications in the client software. If true, this tells the clients that this modification shouldn't result in a user notification.
+
+- **strict_conflict**: `Boolean`
+  Be more strict about how each WriteMode detects conflict. For example, always return a conflict error when mode = WriteMode.update and the given "rev" doesn't match the existing file's "rev", even if the existing file has been deleted.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "upload_dropbox_file",
+    "input": {
+      "path": "{previousStep.output_field}"
+      "file": "{previousStep.output_field}"
+      "autorename": "{previousStep.output_field}"
+      "mute": "{previousStep.output_field}"
+      "strict_conflict": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### List a folder
+
+List the contents of a folder
+
+#### Input Parameters
+- **path**: `Text`
+  The path of the folder to be listed (e.g. /folder1). Use an empty string for the root folder.
+
+- **recursive**: `Boolean`
+  If set to true, the list folder operation will be applied recursively to all subfolders and the response will contain contents of all subfolders.
+
+- **limit**: `Number`
+  The maximum number of results to return (between 1 and 2000). Default is 2000 if not specified.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "list_dropbox_folder",
+    "input": {
+      "path": "{previousStep.output_field}"
+      "recursive": "{previousStep.output_field}"
+      "limit": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Search
+
+Search for files and folders
+
+#### Input Parameters
+- **query**: `Text`
+  The search string. Must be at least 3 characters.
+
+- **path**: `Text`
+  The path to search in. If not specified, the search is performed from the root.
+
+- **max_results**: `Number`
+  The maximum number of search results to return (up to 1000). Default is 100 if not specified.
+
+- **order_by**: `StaticDropdown`
+  Specified property of the order of search results.
+
+- **file_status**: `StaticDropdown`
+  Restricts search to the given file status.
+
+- **filename_only**: `Boolean`
+  Restricts search to only match on filenames.
+
+- **file_extensions**: `Text`
+  Restricts search to only the extensions specified (comma-separated).
+
+- **file_categories**: `Text`
+  Restricts search to only the file categories specified (comma-separated).
+
+- **account_id**: `Text`
+  Restricts results to the given account id.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "search_dropbox",
+    "input": {
+      "query": "{previousStep.output_field}"
+      "path": "{previousStep.output_field}"
+      "max_results": "{previousStep.output_field}"
+      "order_by": "{previousStep.output_field}"
+      "file_status": "{previousStep.output_field}"
+      "filename_only": "{previousStep.output_field}"
+      "file_extensions": "{previousStep.output_field}"
+      "file_categories": "{previousStep.output_field}"
+      "account_id": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Create New Text File
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
+#### Input Parameters
+- **path**: `Text`
+  The path of the new folder e.g. /Homework/math
+
+- **text**: `Text`
+  The text to write into the file.
+
+- **autorename**: `Boolean`
+  If there's a conflict, have the Dropbox server try to autorename the folder to avoid the conflict. The default for this field is False.
+
+- **mute**: `Boolean`
+  Normally, users are made aware of any file modifications in their Dropbox account via notifications in the client software. If true, this tells the clients that this modification shouldn't result in a user notification.
+
+- **strict_conflict**: `Boolean`
+  Be more strict about how each WriteMode detects conflict. For example, always return a conflict error when mode = WriteMode.update and the given "rev" doesn't match the existing file's "rev", even if the existing file has been deleted.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "create_new_dropbox_text_file",
+    "input": {
+      "path": "{previousStep.output_field}"
+      "text": "{previousStep.output_field}"
+      "autorename": "{previousStep.output_field}"
+      "mute": "{previousStep.output_field}"
+      "strict_conflict": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Delete file
+
+Delete a file
+
+#### Input Parameters
+- **path**: `Text`
+  The path of the file to be deleted (e.g. /folder1/file.txt
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "delete_dropbox_file",
+    "input": {
+      "path": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Get temporary file link
+
+Get a temporary file link
+
+#### Input Parameters
+- **path**: `Text`
+  The path of the file (e.g. /folder1/file.txt
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "get_dropbox_file_link",
+    "input": {
+      "path": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Copy file
+
+If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+
+#### Input Parameters
+- **from_path**: `Text`
+  The source path of the file (e.g. /folder1/sourcefile.txt
+
+- **to_path**: `Text`
+  The destination path for the copied (e.g. /folder2/destinationfile.txt
+
+- **autorename**: `Boolean`
+  If there's a conflict, have the Dropbox server try to autorename the file to avoid conflict.
+
+- **allow_ownership_transfer**: `Boolean`
+  Allows copy by owner even if it would result in an ownership transfer.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "copy_dropbox_file",
+    "input": {
+      "from_path": "{previousStep.output_field}"
+      "to_path": "{previousStep.output_field}"
+      "autorename": "{previousStep.output_field}"
+      "allow_ownership_transfer": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Delete folder
+
+Delete a folder
+
+#### Input Parameters
+- **path**: `Text`
+  The path of the folder to be deleted (e.g. /folder1
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "delete_dropbox_folder",
+    "input": {
+      "path": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
+
+### Move folder
+
+If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+
+#### Input Parameters
+- **from_path**: `Text`
+  The current path of the folder (e.g. /folder1/sourceFolder
+
+- **to_path**: `Text`
+  The new path for the folder (e.g. /folder2/destinationFolder
+
+- **autorename**: `Boolean`
+  If there's a conflict, have the Dropbox server try to autorename the folder to avoid conflict.
+
+- **allow_ownership_transfer**: `Boolean`
+  Allows moves by owner even if it would result in an ownership transfer.
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "dropbox",
+    "actionName": "move_dropbox_folder",
+    "input": {
+      "from_path": "{previousStep.output_field}"
+      "to_path": "{previousStep.output_field}"
+      "autorename": "{previousStep.output_field}"
+      "allow_ownership_transfer": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
+---
+
 
 
 
@@ -402,130 +654,83 @@ This piece has no actions or triggers available.
 
 Scalable storage in the cloud
 
+## Actions
+
+### Upload File
+
+Upload an File to S3
+
+#### Input Parameters
+- **file**: `File`
+
+- **fileName**: `Text`
+  my-file-name (no extension
+
+- **acl**: `StaticDropdown`
+
+- **type**: `StaticDropdown`
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "amazon-s3",
+    "actionName": "upload-file",
+    "input": {
+      "file": "{previousStep.output_field}"
+      "fileName": "{previousStep.output_field}"
+      "acl": "{previousStep.output_field}"
+      "type": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
+
 ---
 
-## Flow Structure Example
 
-### Flow Metadata
+### Read File
+
+Read a file from S3 to use it in other steps
+
+#### Input Parameters
+- **key**: `Text`
+  The key of the file to read
+
 ```json
 {
-  "name": "Vendor Data Validation Agent",
-  "description": "",
-  "tags": [
-  ],
-  "pieces": [
-    "@activepieces/piece-webhook",
-    "@activepieces/piece-inputs",
-    "@activepieces/piece-google-drive",
-    "@activepieces/piece-zbrain-ai",
-    "@activepieces/piece-http",
-    "@activepieces/piece-store",
-    "@activepieces/piece-utilities",
-  ],
-  "template": {
-    "displayName": "Vendor Data Validation Agent"
-  }
-}
-```
-
-### Flow Overview
-This flow demonstrates the following sequence:
-1. Starts with a webhook trigger
-2. Executes @activepieces/piece-inputs piece with action 'long_text'
-3. Executes @activepieces/piece-store piece with action 'remove_value'
-4. Executes @activepieces/piece-utilities piece with action 'tokenizer'
-6. Executes @activepieces/piece-store piece with action 'remove_value'
-
-### Complete Flow Configuration
-```json
-{
-  "trigger": {
-    "type": "WEBHOOK",
-    "settings": {},
-    "nextAction": {
-        "name": "step_1",
-        "type": "PIECE",
-        "settings": {
-          "pieceName": "@activepieces/piece-inputs",
-          "actionName": "long_text",
-          "packageType": "ARCHIVE",
-          "pieceType": "CUSTOM",
-          "errorHandlingOptions": {
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-          },
-          "input": {
-            "input": "{{trigger.body.file.content}}",
-          }
-        }
-        ,"nextAction": {
-            "name": "step_3",
-            "type": "PIECE",
-            "settings": {
-              "pieceName": "@activepieces/piece-store",
-              "actionName": "remove_value",
-              "packageType": "REGISTRY",
-              "pieceType": "OFFICIAL",
-              "errorHandlingOptions": {
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-              },
-            }
-            ,"nextAction": {
-                "name": "step_6",
-                "type": "PIECE",
-                "settings": {
-                  "pieceName": "@activepieces/piece-utilities",
-                  "actionName": "tokenizer",
-                  "packageType": "ARCHIVE",
-                  "pieceType": "CUSTOM",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                  },
-                  "input": {
-                    "text": "{{step_1}}",
-                  }
-                }
-                ,"nextAction": {
-                    "name": "step_14",
-                    "type": "PIECE",
-                    "settings": {
-                      "pieceName": "@activepieces/piece-store",
-                      "actionName": "remove_value",
-                      "packageType": "REGISTRY",
-                      "pieceType": "OFFICIAL",
-                      "errorHandlingOptions": {
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                      },
-                    }
-                    }
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "amazon-s3",
+    "actionName": "read-file",
+    "input": {
+      "key": "{previousStep.output_field}"
     }
-    }
-    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
     }
   }
 }
 ```
 
-### Variable References
-The following variables are passed between steps:
-
-**Step `step_1`**
-- Uses `{{trigger.body.file.content}}` for input `input`
-
-**Step `step_6`**
-- Uses `{{step_1}}` for input `text`
-
+---
 
 ## Triggers
 
@@ -533,27 +738,34 @@ The following variables are passed between steps:
 
 Trigger when a new file is uploaded.
 
-Trigger Type: `TriggerStrategy`
+#### Input Parameters
+- **folderPath**: `Text`
 
-#### Trigger Configuration
 ```json
 {
   "trigger": {
     "type": "TriggerStrategy",
     "settings": {
-      "folderPath": null,  // 
+      "folderPath": null
     },
-    "nextAction": {  // Configure your first action step here
-      // ... action configuration
+    "nextAction": {
+      "type": "PIECE",
+      "settings": {
+        "pieceName": "piece_name",
+        "actionName": "action_name",
+        "input": {
+          "param": "{{trigger.body}}"
+        }
+      }
     }
   }
 }
 ```
 
-#### Parameters
-
-- **Folder Path** (Optional)
-  - Type: `Text`
+Trigger outputs available in next steps:
+- `{{trigger.body}}` - Request body
+- `{{trigger.headers}}` - Request headers
+- `{{trigger.query}}` - Query parameters
 
 ---
 
@@ -564,178 +776,68 @@ Trigger Type: `TriggerStrategy`
 
 Simple, modern scheduling
 
----
-
-## Flow Structure Example
-
-### Flow Metadata
-```json
-{
-  "name": "Vendor Data Validation Agent",
-  "description": "",
-  "tags": [
-  ],
-  "pieces": [
-    "@activepieces/piece-webhook",
-    "@activepieces/piece-inputs",
-    "@activepieces/piece-google-drive",
-    "@activepieces/piece-zbrain-ai",
-    "@activepieces/piece-http",
-    "@activepieces/piece-store",
-    "@activepieces/piece-utilities",
-  ],
-  "template": {
-    "displayName": "Vendor Data Validation Agent"
-  }
-}
-```
-
-### Flow Overview
-This flow demonstrates the following sequence:
-1. Starts with a webhook trigger
-2. Executes @activepieces/piece-inputs piece with action 'long_text'
-3. Executes @activepieces/piece-store piece with action 'remove_value'
-4. Executes @activepieces/piece-utilities piece with action 'tokenizer'
-6. Executes @activepieces/piece-store piece with action 'remove_value'
-
-### Complete Flow Configuration
-```json
-{
-  "trigger": {
-    "type": "WEBHOOK",
-    "settings": {},
-    "nextAction": {
-        "name": "step_1",
-        "type": "PIECE",
-        "settings": {
-          "pieceName": "@activepieces/piece-inputs",
-          "actionName": "long_text",
-          "packageType": "ARCHIVE",
-          "pieceType": "CUSTOM",
-          "errorHandlingOptions": {
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-          },
-          "input": {
-            "input": "{{trigger.body.file.content}}",
-          }
-        }
-        ,"nextAction": {
-            "name": "step_3",
-            "type": "PIECE",
-            "settings": {
-              "pieceName": "@activepieces/piece-store",
-              "actionName": "remove_value",
-              "packageType": "REGISTRY",
-              "pieceType": "OFFICIAL",
-              "errorHandlingOptions": {
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-              },
-            }
-            ,"nextAction": {
-                "name": "step_6",
-                "type": "PIECE",
-                "settings": {
-                  "pieceName": "@activepieces/piece-utilities",
-                  "actionName": "tokenizer",
-                  "packageType": "ARCHIVE",
-                  "pieceType": "CUSTOM",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                  },
-                  "input": {
-                    "text": "{{step_1}}",
-                  }
-                }
-                ,"nextAction": {
-                    "name": "step_14",
-                    "type": "PIECE",
-                    "settings": {
-                      "pieceName": "@activepieces/piece-store",
-                      "actionName": "remove_value",
-                      "packageType": "REGISTRY",
-                      "pieceType": "OFFICIAL",
-                      "errorHandlingOptions": {
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                      },
-                    }
-                    }
-    }
-    }
-    }
-    }
-  }
-}
-```
-
-### Variable References
-The following variables are passed between steps:
-
-**Step `step_1`**
-- Uses `{{trigger.body.file.content}}` for input `input`
-
-**Step `step_6`**
-- Uses `{{step_1}}` for input `text`
-
-
 ## Triggers
 
 ### Event Canceled
 
 Triggers when a new Calendly event is canceled
 
-Trigger Type: `TriggerStrategy`
-
-#### Trigger Configuration
 ```json
 {
   "trigger": {
     "type": "TriggerStrategy",
     "settings": {
     },
-    "nextAction": {  // Configure your first action step here
-      // ... action configuration
+    "nextAction": {
+      "type": "PIECE",
+      "settings": {
+        "pieceName": "piece_name",
+        "actionName": "action_name",
+        "input": {
+          "param": "{{trigger.body}}"
+        }
+      }
     }
   }
 }
 ```
 
-This trigger has no configurable parameters.
+Trigger outputs available in next steps:
+- `{{trigger.body}}` - Request body
+- `{{trigger.headers}}` - Request headers
+- `{{trigger.query}}` - Query parameters
 
 ---
+
 
 ### Event Scheduled
 
 Triggers when a new Calendly event is scheduled
 
-Trigger Type: `TriggerStrategy`
-
-#### Trigger Configuration
 ```json
 {
   "trigger": {
     "type": "TriggerStrategy",
     "settings": {
     },
-    "nextAction": {  // Configure your first action step here
-      // ... action configuration
+    "nextAction": {
+      "type": "PIECE",
+      "settings": {
+        "pieceName": "piece_name",
+        "actionName": "action_name",
+        "input": {
+          "param": "{{trigger.body}}"
+        }
+      }
     }
   }
 }
 ```
 
-This trigger has no configurable parameters.
+Trigger outputs available in next steps:
+- `{{trigger.body}}` - Request body
+- `{{trigger.headers}}` - Request headers
+- `{{trigger.query}}` - Query parameters
 
 ---
 
@@ -746,133 +848,43 @@ This trigger has no configurable parameters.
 
 Fetch the price of a crypto pair from Binance
 
-Authentication: None
+## Actions
+
+### Fetch Pair Price
+
+The currency to fetch the price for (e.g. 'BTC' in 'BTC/USDT
+
+#### Input Parameters
+- **first_coin**: `Text`
+  The currency to fetch the price for (e.g. 'BTC' in 'BTC/USDT
+
+- **second_coin**: `Text`
+  The currency to fetch the price in (e.g. 'USDT' in 'BTC/USDT
+
+```json
+{
+  "type": "PIECE",
+  "settings": {
+    "pieceName": "binance",
+    "actionName": "fetch_crypto_pair_price",
+    "input": {
+      "first_coin": "{previousStep.output_field}"
+      "second_coin": "{previousStep.output_field}"
+    }
+  },
+  "nextAction": {
+    "type": "PIECE",
+    "settings": {
+      "pieceName": "piece_name",
+      "actionName": "action_name",
+      "input": {
+        "param": "{{currentStep.output}}"
+      }
+    }
+  }
+}
+```
 
 ---
 
-## Flow Structure Example
-
-### Flow Metadata
-```json
-{
-  "name": "Vendor Data Validation Agent",
-  "description": "",
-  "tags": [
-  ],
-  "pieces": [
-    "@activepieces/piece-webhook",
-    "@activepieces/piece-inputs",
-    "@activepieces/piece-google-drive",
-    "@activepieces/piece-zbrain-ai",
-    "@activepieces/piece-http",
-    "@activepieces/piece-store",
-    "@activepieces/piece-utilities",
-  ],
-  "template": {
-    "displayName": "Vendor Data Validation Agent"
-  }
-}
-```
-
-### Flow Overview
-This flow demonstrates the following sequence:
-1. Starts with a webhook trigger
-2. Executes @activepieces/piece-inputs piece with action 'long_text'
-3. Executes @activepieces/piece-store piece with action 'remove_value'
-4. Executes @activepieces/piece-utilities piece with action 'tokenizer'
-6. Executes @activepieces/piece-store piece with action 'remove_value'
-
-### Complete Flow Configuration
-```json
-{
-  "trigger": {
-    "type": "WEBHOOK",
-    "settings": {},
-    "nextAction": {
-        "name": "step_1",
-        "type": "PIECE",
-        "settings": {
-          "pieceName": "@activepieces/piece-inputs",
-          "actionName": "long_text",
-          "packageType": "ARCHIVE",
-          "pieceType": "CUSTOM",
-          "errorHandlingOptions": {
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-            "retryOnFailure": {"value": false},
-            "continueOnFailure": {"value": false},
-          },
-          "input": {
-            "input": "{{trigger.body.file.content}}",
-          }
-        }
-        ,"nextAction": {
-            "name": "step_3",
-            "type": "PIECE",
-            "settings": {
-              "pieceName": "@activepieces/piece-store",
-              "actionName": "remove_value",
-              "packageType": "REGISTRY",
-              "pieceType": "OFFICIAL",
-              "errorHandlingOptions": {
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-                "retryOnFailure": {"value": false},
-                "continueOnFailure": {"value": false},
-              },
-            }
-            ,"nextAction": {
-                "name": "step_6",
-                "type": "PIECE",
-                "settings": {
-                  "pieceName": "@activepieces/piece-utilities",
-                  "actionName": "tokenizer",
-                  "packageType": "ARCHIVE",
-                  "pieceType": "CUSTOM",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                    "retryOnFailure": {"value": false},
-                    "continueOnFailure": {"value": false},
-                  },
-                  "input": {
-                    "text": "{{step_1}}",
-                  }
-                }
-                ,"nextAction": {
-                    "name": "step_14",
-                    "type": "PIECE",
-                    "settings": {
-                      "pieceName": "@activepieces/piece-store",
-                      "actionName": "remove_value",
-                      "packageType": "REGISTRY",
-                      "pieceType": "OFFICIAL",
-                      "errorHandlingOptions": {
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                        "retryOnFailure": {"value": false},
-                        "continueOnFailure": {"value": false},
-                      },
-                    }
-                    }
-    }
-    }
-    }
-    }
-  }
-}
-```
-
-### Variable References
-The following variables are passed between steps:
-
-**Step `step_1`**
-- Uses `{{trigger.body.file.content}}` for input `input`
-
-**Step `step_6`**
-- Uses `{{step_1}}` for input `text`
-
-
-
-This piece has no actions or triggers available.
 
