@@ -7,7 +7,7 @@ class PieceParser:
     def __init__(self):
         self.property_types = {
             'ShortText': 'Text',
-            'LongText': 'Text',
+            'LongText': 'Text', 
             'Number': 'Number',
             'Checkbox': 'Boolean',
             'Select': 'Select',
@@ -37,16 +37,38 @@ class PieceParser:
         if "validate:" in prop_content:
             rules['has_validation'] = True
 
-        # Extract options for Select/MultiSelect
-        if "options:" in prop_content:
-            options_match = re.search(r'options:\s*(\[.*?\])', prop_content, re.DOTALL)
+        # Extract options for StaticDropdown/Select/Enum
+        options_str = ""
+        if any(pattern in prop_content for pattern in ["StaticDropdown", "Select", "options:", "enum:"]):
+            # Try first for StaticDropdown/Select format
+            options_match = re.search(r'options:\s*{[^}]*options:\s*(\[.*?\])', prop_content, re.DOTALL)
             if options_match:
                 try:
-                    # Clean and parse options string
-                    options_str = options_match.group(1).replace('\n', '').strip()
-                    rules['options'] = options_str
+                    options_list = []
+                    label_values = re.finditer(r'{[^}]*label:\s*[\'"]([^\'"]*)[\'"][^}]*value:\s*([^,}\s]+)', options_match.group(1))
+                    for match in label_values:
+                        label, value = match.groups()
+                        options_list.append(f"{label}: {value}")
+                    if options_list:
+                        options_str = "\n    " + "\n    ".join(options_list)
                 except:
                     pass
+
+            # If no options found, try enum format
+            if not options_str:
+                enum_match = re.search(r'enum:\s*{([^}]+)}', prop_content)
+                if enum_match:
+                    try:
+                        enum_content = enum_match.group(1)
+                        enum_pairs = re.finditer(r'(\w+)\s*=\s*[\'"]([^\'"]+)[\'"]', enum_content)
+                        options_list = [f"{key}: {value}" for key, value in [pair.groups() for pair in enum_pairs]]
+                        if options_list:
+                            options_str = "\n    " + "\n    ".join(options_list)
+                    except:
+                        pass
+
+            if options_str:
+                rules['options'] = options_str
 
         return rules if rules else None
 
@@ -65,38 +87,15 @@ class PieceParser:
             return value
         return None
 
-    def extract_settings_template(self, example_data: Dict) -> Optional[StepSettings]:
-        """Extract settings template from flow example data."""
-        if not example_data or not isinstance(example_data, dict):
-            return None
-
-        error_handling = ErrorHandlingOptions()
-        if 'errorHandlingOptions' in example_data:
-            error_opts = example_data['errorHandlingOptions']
-            error_handling.retry_on_failure = error_opts.get('retryOnFailure', {}).get('value', False)
-            error_handling.continue_on_failure = error_opts.get('continueOnFailure', {}).get('value', False)
-
-        return StepSettings(
-            piece_name=example_data.get('pieceName', ''),
-            piece_version=example_data.get('pieceVersion', '0.0.1'),
-            action_name=example_data.get('actionName', ''),
-            input=example_data.get('input', {}),
-            input_ui_info=example_data.get('inputUiInfo', {}),
-            package_type=example_data.get('packageType', 'REGISTRY'),
-            error_handling=error_handling
-        )
-
     def parse_property(self, prop_name: str, prop_content: str) -> Optional[Property]:
         """Parse a Property definition from TypeScript code."""
         if not prop_content:
             return None
 
-        # Extract basic property info
-        display_name = extract_value_by_key(prop_content, "displayName")
+        display_name = extract_value_by_key(prop_content, "displayName") or prop_name
         description = extract_value_by_key(prop_content, "description")
         required = "required: true" in prop_content.lower()
 
-        # Extract property type
         type_match = re.search(r'Property\.(\w+)\({', prop_content)
         if not type_match:
             return None
@@ -104,23 +103,8 @@ class PieceParser:
         raw_type = type_match.group(1)
         property_type = self.property_types.get(raw_type, raw_type)
 
-        # Extract additional metadata
         validation_rules = self.extract_validation_rules(prop_content)
         default_value = self.extract_default_value(prop_content)
-
-        # Extract UI info
-        ui_info_match = re.search(r'inputUiInfo:\s*({[^}]+})', prop_content)
-        input_ui_info = None
-        if ui_info_match:
-            try:
-                ui_str = ui_info_match.group(1)
-                input_ui_info = eval(ui_str)  # Safe since we control the input
-            except:
-                pass
-
-        # Extract package type
-        package_type_match = re.search(r'packageType:\s*[\'"]([^\'"]+)[\'"]', prop_content)
-        package_type = package_type_match.group(1) if package_type_match else 'REGISTRY'
 
         return Property(
             name=prop_name,
@@ -130,8 +114,8 @@ class PieceParser:
             property_type=property_type,
             validation_rules=validation_rules,
             default_value=default_value,
-            input_ui_info=input_ui_info,
-            package_type=package_type
+            input_ui_info=None,
+            package_type="REGISTRY"
         )
 
     def parse_component(self, content: str, component_type: str) -> Optional[Union[Action, Trigger]]:
@@ -149,6 +133,9 @@ class PieceParser:
             return None
 
         name = extract_value_by_key(component_def, "name")
+        if not name:  # Skip if no name found
+            return None
+
         display_name = extract_value_by_key(component_def, "displayName")
         description = extract_value_by_key(component_def, "description")
 
@@ -188,12 +175,16 @@ class PieceParser:
             type_match = re.search(r'type:\s*TriggerStrategy\.(\w+)', component_def)
             if type_match:
                 trigger_type = type_match.group(1)
+            else:
+                type_match = re.search(r'triggerType:\s*[\'"](\w+)[\'"]', component_def)
+                if type_match:
+                    trigger_type = type_match.group(1)
 
         component_class = Action if component_type == "Action" else Trigger
         return component_class(
             name=clean_typescript_string(name),
-            display_name=clean_typescript_string(display_name),
-            description=clean_typescript_string(description),
+            display_name=clean_typescript_string(display_name or name),
+            description=clean_typescript_string(description or ""),
             properties=properties,
             piece_version="0.0.1",  # Default version
             settings_template=None,  # Will be populated from flow examples
@@ -225,19 +216,11 @@ class PieceParser:
             return None
 
         display_name = extract_value_by_key(piece_def, "displayName")
+        if not display_name:  # Skip if no display name found
+            return None
+
         description = extract_value_by_key(piece_def, "description")
         logo_url = extract_value_by_key(piece_def, "logoUrl")
-        min_release = extract_value_by_key(piece_def, "minimumSupportedRelease") or "0.0.1"  # Default version
-
-        # Extract categories if present
-        categories_match = re.search(r'categories:\s*\[(.*?)\]', piece_def)
-        categories = []
-        if categories_match:
-            categories_str = categories_match.group(1)
-            categories = [
-                clean_typescript_string(c.strip())
-                for c in re.findall(r'["\']([^"\']+)["\']', categories_str)
-            ]
 
         # Extract auth type
         auth_type = None
@@ -261,12 +244,12 @@ class PieceParser:
         return Piece(
             name=clean_typescript_string(display_name).lower().replace(" ", "-"),
             display_name=clean_typescript_string(display_name),
-            description=clean_typescript_string(description),
-            minimum_supported_release=clean_typescript_string(min_release),
-            logo_url=clean_typescript_string(logo_url),
+            description=clean_typescript_string(description or ""),
+            minimum_supported_release="0.0.1",  # Fixed version as requested
+            logo_url=clean_typescript_string(logo_url or ""),
             actions=[],
             triggers=[],
-            categories=categories,
+            categories=[],  # Removed as requested
             auth_type=auth_type,
             package_type=package_type,
             piece_type=piece_type

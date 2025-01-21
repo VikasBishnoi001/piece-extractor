@@ -8,9 +8,35 @@ from models import Piece, Action, Trigger
 def generate_property_docs(prop) -> List[str]:
     """Generate minimal property documentation focused on flow creation."""
     doc = []
-    doc.append(f"- **{prop.name}**: `{prop.property_type}`")
+    doc.append(f"- **{prop.name}** (`{prop.property_type}`)")
     if prop.description:
         doc.append(f"  {prop.description}")
+
+    # Add validation rules if they exist
+    if prop.validation_rules:
+        if 'options' in prop.validation_rules:
+            doc.append("  **Options:**")
+            doc.append("  | Label | Value |")
+            doc.append("  |-------|-------|")
+            options = prop.validation_rules['options'].strip()
+            if options:
+                for option in options.split('\n'):
+                    if ':' in option:
+                        label, value = option.split(':', 1)
+                        doc.append(f"  | {label.strip()} | {value.strip()} |")
+
+        if 'minimum' in prop.validation_rules:
+            doc.append(f"  **Minimum:** {prop.validation_rules['minimum']}")
+        if 'maximum' in prop.validation_rules:
+            doc.append(f"  **Maximum:** {prop.validation_rules['maximum']}")
+
+    # Add default value if it exists
+    if prop.default_value is not None:
+        doc.append(f"  **Default:** `{prop.default_value}`")
+
+    if prop.required:
+        doc.append("  **Required:** Yes")
+
     doc.append("")
     return doc
 
@@ -19,34 +45,27 @@ def generate_component_settings_docs(component) -> List[str]:
     doc = []
     doc.append("```json")
     doc.append("{")
-    doc.append('  "type": "PIECE",')
-    doc.append('  "valid": true,')
     doc.append('  "settings": {')
     doc.append(f'    "pieceName": "{component.piece_name}",')
-    doc.append(f'    "pieceVersion": "0.0.1",')
+    doc.append('    "pieceVersion": "0.0.1",')
     doc.append(f'    "actionName": "{component.name}",')
     doc.append('    "input": {')
     if component.properties:
+        props_list = []
         for prop in component.properties:
-            doc.append(f'      "{prop.name}": "{{previousStep.output_field}}"')
+            # Use default value if available, otherwise use a template value
+            value = prop.default_value if prop.default_value is not None else "{{previousStep.output}}"
+            # For properties with predefined options, use first option as example
+            if prop.validation_rules and 'options' in prop.validation_rules:
+                options = prop.validation_rules['options'].strip().split('\n')
+                if options:
+                    first_option = options[0].split(':', 1)[1].strip()
+                    value = first_option
+            props_list.append(f'      "{prop.name}": {json.dumps(value)}')
+        doc.append(",\n".join(props_list))
     doc.append('    },')
     doc.append('    "inputUiInfo": {},')
-    doc.append('    "packageType": "REGISTRY",')
-    doc.append('    "errorHandlingOptions": {')
-    doc.append('      "retryOnFailure": { "value": false },')
-    doc.append('      "continueOnFailure": { "value": false }')
-    doc.append('    }')
-    doc.append('  },')
-    doc.append('  "nextAction": {')
-    doc.append('    "type": "PIECE",')
-    doc.append('    "valid": true,')
-    doc.append('    "settings": {')
-    doc.append('      "pieceName": "piece_name",')
-    doc.append('      "actionName": "action_name",')
-    doc.append('      "input": {')
-    doc.append('        "param": "{{currentStep.output}}"')
-    doc.append('      }')
-    doc.append('    }')
+    doc.append('    "packageType": "REGISTRY"')
     doc.append('  }')
     doc.append('}')
     doc.append('```')
@@ -59,35 +78,30 @@ def generate_trigger_config_docs(trigger) -> List[str]:
     doc.append("```json")
     doc.append("{")
     doc.append('  "trigger": {')
-    doc.append('    "name": "trigger",')
     doc.append('    "valid": true,')
-    doc.append('    "displayName": "Webhook Trigger",')
     doc.append(f'    "type": "{trigger.trigger_type}",')
     doc.append('    "settings": {')
     if trigger.properties:
+        props_list = []
         for prop in trigger.properties:
-            doc.append(f'      "{prop.name}": null,')
-    doc.append('      "inputUiInfo": {}')
-    doc.append('    },')
-    doc.append('    "nextAction": {')
-    doc.append('      "type": "PIECE",')
-    doc.append('      "valid": true,')
-    doc.append('      "settings": {')
-    doc.append('        "pieceName": "piece_name",')
-    doc.append('        "actionName": "action_name",')
-    doc.append('        "input": {')
-    doc.append('          "param": "{{trigger.body}}"')
-    doc.append('        }')
-    doc.append('      }')
+            value = prop.default_value if prop.default_value is not None else None
+            # For properties with predefined options, use first option as example
+            if prop.validation_rules and 'options' in prop.validation_rules:
+                options = prop.validation_rules['options'].strip().split('\n')
+                if options:
+                    first_option = options[0].split(':', 1)[1].strip()
+                    value = first_option
+            props_list.append(f'      "{prop.name}": {json.dumps(value)}')
+        doc.append(",\n".join(props_list))
     doc.append('    }')
     doc.append('  }')
     doc.append('}')
     doc.append('```')
     doc.append("")
-    doc.append("Trigger outputs available in next steps:")
-    doc.append("- `{{trigger.body}}` - Request body")
-    doc.append("- `{{trigger.headers}}` - Request headers") 
-    doc.append("- `{{trigger.query}}` - Query parameters")
+    doc.append("**Step Outputs:**")
+    doc.append("- `{{trigger.body}}` - The complete request body")
+    doc.append("- `{{trigger.headers}}` - HTTP request headers")
+    doc.append("- `{{trigger.query}}` - URL query parameters")
     doc.append("")
     return doc
 
@@ -95,16 +109,16 @@ def generate_documentation(piece: Piece, flow_examples: Dict) -> str:
     """Generate minimal documentation focused on flow creation."""
     doc = []
 
-    # Piece name and description only
+    # Piece name and description
     doc.append(f"# {piece.display_name}")
     if piece.description:
         doc.append(f"\n{piece.description}\n")
 
-    # Actions with minimal info needed for flow creation
+    # Document actions with minimal info needed for flow creation
     if piece.actions:
-        doc.append("## Actions")
+        doc.append("## Actions\n")
         for action in piece.actions:
-            doc.append(f"\n### {action.display_name}")
+            doc.append(f"### {action.display_name}")
             if action.description:
                 doc.append(f"\n{action.description}\n")
 
@@ -113,14 +127,16 @@ def generate_documentation(piece: Piece, flow_examples: Dict) -> str:
                 for prop in action.properties:
                     doc.extend(generate_property_docs(prop))
 
-            doc.extend(generate_component_settings_docs(action))
+                doc.append("#### Flow Configuration")
+                doc.extend(generate_component_settings_docs(action))
+
             doc.append("---\n")
 
-    # Triggers with minimal info needed for flow creation  
+    # Document triggers with minimal info needed for flow creation
     if piece.triggers:
-        doc.append("## Triggers")
+        doc.append("## Triggers\n")
         for trigger in piece.triggers:
-            doc.append(f"\n### {trigger.display_name}")
+            doc.append(f"### {trigger.display_name}")
             if trigger.description:
                 doc.append(f"\n{trigger.description}\n")
 
@@ -129,11 +145,13 @@ def generate_documentation(piece: Piece, flow_examples: Dict) -> str:
                 for prop in trigger.properties:
                     doc.extend(generate_property_docs(prop))
 
-            doc.extend(generate_trigger_config_docs(trigger))
+                doc.append("#### Flow Configuration")
+                doc.extend(generate_trigger_config_docs(trigger))
+
             doc.append("---\n")
 
     if not piece.actions and not piece.triggers:
-        doc.append("\nThis piece has no actions or triggers available.\n")
+        doc.append("\nNo actions or triggers available.\n")
 
     doc.append("\n")
     return "\n".join(doc)
@@ -198,7 +216,8 @@ def process_piece_directory(directory: str, flow_examples: Optional[Dict] = None
                                 except Exception as e:
                                     print(f"Warning: Error parsing trigger file {file}: {str(e)}")
 
-            docs.append(generate_documentation(piece, flow_examples))
+            if piece.actions or piece.triggers:
+                docs.append(generate_documentation(piece, flow_examples))
 
         except Exception as e:
             print(f"Error processing {index_file}: {str(e)}")
